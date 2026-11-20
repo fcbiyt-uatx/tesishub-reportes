@@ -413,25 +413,6 @@
         </div>
         <div id="tools-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
       </section>
-
-      <!-- Pending Manual Actions -->
-      <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
-        <h2 class="text-base font-semibold">Acciones Manuales Pendientes de Cierre</h2>
-        <div class="space-y-2 text-xs">
-          <label class="flex items-start gap-3 p-3 rounded-lg bg-[var(--content)] border border-[var(--border)] cursor-pointer">
-            <input type="checkbox" class="mt-0.5 accent-[var(--primary)]" />
-            <span>
-              <strong class="text-[var(--foreground)]">Completar Sprint 8 en Jira (ID 140):</strong> las 5 historias (26/26 SP) ya están en <em>Finalizado</em>; el MCP de Atlassian no expone cierre formal de sprints, por lo que solo falta pulsar «Completar sprint» en el tablero.
-            </span>
-          </label>
-          <label class="flex items-start gap-3 p-3 rounded-lg bg-[var(--content)] border border-[var(--border)] cursor-pointer">
-            <input type="checkbox" class="mt-0.5 accent-[var(--primary)]" />
-            <span>
-              <strong class="text-[var(--foreground)]">Configurar secreto <code>CROSS_REPO_TOKEN</code> en GitHub Actions (<code>tesishub-infra</code>):</strong> necesario para que <code>.github/workflows/e2e-mock.yml</code> clone los repos privados <code>tesishub-backend</code> y <code>tesishub-frontend</code> (permiso <code>Contents: Read</code>).
-            </span>
-          </label>
-        </div>
-      </section>
     </main>
   </div>
 

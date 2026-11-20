@@ -462,6 +462,7 @@
       const nav = document.getElementById('sprint-nav');
       const items = [
         { id: 'global', label: 'Vista Global (Sprints 2–8)' },
+        { id: 'orchestration', label: 'Configuración de Orquestación' },
         ...sprints.map(s => ({ id: s.id, label: s.shortLabel }))
       ];
       nav.innerHTML = items.map(it => `
@@ -780,9 +781,229 @@
       container.innerHTML = svg;
     }
 
+    // ---------- ORCHESTRATION VIEW ----------
+    function renderOrchestrationView() {
+      const stages = [
+        {
+          span: 'Sprints 2 – 3',
+          badge: 'Base Maker–Checker',
+          detail: 'Claude Code CLI como Maker y subagente efímero Antigravity como Checker en worktrees aislados con junctions NTFS hacia C:\\DevTargets y worktrees dedicados para IDE.'
+        },
+        {
+          span: 'Sprints 4 – 6',
+          badge: 'Failover de Cuota',
+          detail: 'Respaldo automático al agotarse la ventana de 5 h de Claude Code CLI (cambio a Antigravity Pro/Flash), limpieza estricta de subagentes efímeros y cliente auxiliar OAuth para Jira.'
+        },
+        {
+          span: 'Sprint 7',
+          badge: 'Multi-Repo + Docker',
+          detail: 'Orquestación simultánea sobre tesishub-backend, tesishub-frontend y tesishub-infra con validación empírica en stacks Docker reales (Traefik dinámico, WireMock y RabbitMQ).'
+        },
+        {
+          span: 'Sprint 8',
+          badge: 'Plan/Execute + Swarm UI',
+          detail: 'Coordinador Plan/Execute (Orchestrator Neon), escalera estricta de 5 niveles de modelos y transición en caliente a Swarm UI (monitor de stalls + swarm{action:"model"} sin perder contexto).'
+        }
+      ];
+
+      const worktrees = [
+        { repo: 'tesishub-backend', maker: 'tesishub-backend', checker: 'tesishub-backend-audit', junctions: 'target → C:\\DevTargets', gates: 'spotless:check · verify (sin clean) · JaCoCo ≥ 80% · ArchUnit · Pact · Testcontainers' },
+        { repo: 'tesishub-frontend', maker: 'tesishub-frontend', checker: 'tesishub-frontend-audit', junctions: 'node_modules, .angular, dist, coverage', gates: 'format:check · lint · typecheck · api:check · docs:check · test:coverage ≥ 80% · build · Playwright + axe' },
+        { repo: 'tesishub-infra', maker: 'tesishub-infra', checker: 'tesishub-infra-audit', junctions: 'Worktree detached (sin junctions)', gates: 'docker compose config · mikefarah/yq:4 · E2E Playwright contra stack Docker real + down -v' }
+      ];
+
+      const jiraStates = [
+        { name: 'Por hacer', id: '11', actor: 'Backlog', desc: 'Estado inicial antes de despachar el ticket.' },
+        { name: 'En curso', id: '21', actor: 'Maker', desc: 'Implementa en rama dedicada, corre gates y abre PR.' },
+        { name: 'En revisión', id: '31', actor: 'Checker', desc: 'Audita en worktree -audit con corroboración empírica.' },
+        { name: 'Cambios solicitados', id: '2', actor: 'Maker (R2–R3)', desc: 'Corrige bloqueantes incorporando los tests fallidos del Checker.' },
+        { name: 'Aprobada', id: '3', actor: 'Coordinador', desc: '0 bloqueantes (aunque haya NITs) → merge squash y sync develop.' },
+        { name: 'Finalizado', id: '41', actor: 'Cierre', desc: 'Ticket cerrado y workers liberados.' }
+      ];
+
+      const ladder = [
+        { tier: 'Nivel 1', engine: 'Claude Code CLI', model: 'Opus 5.5 (--effort xhigh)', role: 'Maker y Checker primario' },
+        { tier: 'Nivel 2', engine: 'Swarm UI', model: 'Claude Sonnet 5.5 (High)', role: 'Primer respaldo en Antigravity' },
+        { tier: 'Nivel 3', engine: 'Swarm UI', model: 'Gemini 4 Argon (High)', role: 'Segundo respaldo en Antigravity' },
+        { tier: 'Nivel 4', engine: 'Swarm UI', model: 'Gemini 4 Neon (High / XHigh)', role: 'Tercer respaldo (cerró S8)' },
+        { tier: 'Nivel 5', engine: 'Swarm UI', model: 'Gemini 3.8 Flash (High)', role: 'Reserva final (intacta al 34%)' }
+      ];
+
+      document.getElementById('view-root').innerHTML = `
+        <!-- Architecture SVG -->
+        <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-4">
+          <div class="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <h2 class="text-base font-semibold">Arquitectura de Orquestación Multi-Agente (Maker–Checker)</h2>
+              <p class="text-xs text-[var(--muted-foreground)]">
+                Separación estricta de roles, aislamiento físico por git worktrees y pizarra de estados en Jira (<code class="text-[var(--code-foreground)]">.agent/skills/pr-audit/SKILL.md</code>).
+              </p>
+            </div>
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-[var(--content)] border border-[var(--border)] text-[var(--accent)]">Máx. 3 rondas / PR</span>
+          </div>
+          <div class="overflow-x-auto">
+            <svg viewBox="0 0 920 270" class="w-full min-w-[720px] h-auto" role="img" aria-label="Diagrama de arquitectura de orquestación Maker Checker">
+              <defs>
+                <marker id="orch-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--muted-foreground)" />
+                </marker>
+              </defs>
+
+              <rect x="16" y="88" width="192" height="94" rx="10" fill="var(--content)" stroke="var(--primary)" stroke-width="2" />
+              <text x="112" y="114" text-anchor="middle" fill="var(--foreground)" font-size="13" font-weight="700">Coordinador</text>
+              <text x="112" y="133" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">Antigravity (Plan / Execute)</text>
+              <text x="112" y="150" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">Jira MCP · Merges · Failover</text>
+              <text x="112" y="168" text-anchor="middle" fill="var(--primary)" font-size="11" font-weight="600">No escribe ni audita código</text>
+
+              <rect x="268" y="22" width="218" height="88" rx="10" fill="var(--content)" stroke="var(--chart-1)" stroke-width="2" />
+              <text x="377" y="46" text-anchor="middle" fill="var(--foreground)" font-size="12" font-weight="700">Motor Primario (Nivel 1)</text>
+              <text x="377" y="65" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">Claude Code CLI (Opus 5.5 xhigh)</text>
+              <text x="377" y="83" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">Ejecución headless por repositorio</text>
+              <text x="377" y="100" text-anchor="middle" fill="var(--chart-1)" font-size="10.5">Maker y Checker con sesión limpia</text>
+
+              <rect x="268" y="152" width="218" height="96" rx="10" fill="var(--content)" stroke="var(--chart-3)" stroke-width="2" />
+              <text x="377" y="176" text-anchor="middle" fill="var(--foreground)" font-size="12" font-weight="700">Failover: Swarm UI (Niveles 2–5)</text>
+              <text x="377" y="195" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">Sonnet → Argon → Neon → Flash 3.8</text>
+              <text x="377" y="213" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">Monitor de stalls + cambio en vivo</text>
+              <text x="377" y="232" text-anchor="middle" fill="var(--chart-3)" font-size="10.5">workspace: "inherit" · rutas absolutas</text>
+
+              <rect x="542" y="28" width="174" height="80" rx="10" fill="var(--content)" stroke="var(--border)" stroke-width="1.5" />
+              <text x="629" y="54" text-anchor="middle" fill="var(--foreground)" font-size="12" font-weight="700">Worktree Maker</text>
+              <text x="629" y="72" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">tesishub-{back,front,infra}</text>
+              <text x="629" y="90" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">Implementación · Gates · PR</text>
+
+              <rect x="542" y="160" width="174" height="80" rx="10" fill="var(--content)" stroke="var(--border)" stroke-width="1.5" />
+              <text x="629" y="186" text-anchor="middle" fill="var(--foreground)" font-size="12" font-weight="700">Worktree Checker</text>
+              <text x="629" y="204" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">tesishub-*-audit (aislado)</text>
+              <text x="629" y="222" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">Test empírico · gh pr review</text>
+
+              <rect x="764" y="56" width="140" height="62" rx="10" fill="var(--content)" stroke="var(--success)" stroke-width="1.5" />
+              <text x="834" y="82" text-anchor="middle" fill="var(--foreground)" font-size="12" font-weight="700">GitHub</text>
+              <text x="834" y="100" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">PRs · Reviews · Actions</text>
+
+              <rect x="764" y="150" width="140" height="62" rx="10" fill="var(--content)" stroke="var(--accent)" stroke-width="1.5" />
+              <text x="834" y="176" text-anchor="middle" fill="var(--foreground)" font-size="12" font-weight="700">Jira (HUB)</text>
+              <text x="834" y="194" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">Pizarra de Estados</text>
+
+              <path d="M 208 116 L 264 74" fill="none" stroke="var(--muted-foreground)" stroke-width="1.5" marker-end="url(#orch-arrow)" />
+              <path d="M 208 154 L 264 192" fill="none" stroke="var(--muted-foreground)" stroke-width="1.5" marker-end="url(#orch-arrow)" />
+              <path d="M 486 56 L 538 56" fill="none" stroke="var(--muted-foreground)" stroke-width="1.5" marker-end="url(#orch-arrow)" />
+              <path d="M 486 84 L 538 184" fill="none" stroke="var(--muted-foreground)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#orch-arrow)" />
+              <path d="M 486 182 L 538 82" fill="none" stroke="var(--muted-foreground)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#orch-arrow)" />
+              <path d="M 486 206 L 538 206" fill="none" stroke="var(--muted-foreground)" stroke-width="1.5" marker-end="url(#orch-arrow)" />
+              <path d="M 716 68 L 760 82" fill="none" stroke="var(--muted-foreground)" stroke-width="1.5" marker-end="url(#orch-arrow)" />
+              <path d="M 716 190 L 760 104" fill="none" stroke="var(--muted-foreground)" stroke-width="1.5" marker-end="url(#orch-arrow)" />
+              <path d="M 716 204 L 760 186" fill="none" stroke="var(--muted-foreground)" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#orch-arrow)" />
+            </svg>
+          </div>
+        </section>
+
+        <!-- Evolution across Sprints -->
+        <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+          <div>
+            <h2 class="text-base font-semibold">Evolución de la Orquestación (Sprints 2 – 8)</h2>
+            <p class="text-xs text-[var(--muted-foreground)]">Cómo evolucionó el pipeline autónomo desde el experimento inicial hasta el failover completo en Swarm UI.</p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            ${stages.map(st => `
+              <div class="p-3.5 rounded-lg bg-[var(--content)] border border-[var(--border)] space-y-1.5 text-xs">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-mono font-bold text-[var(--foreground)]">${st.span}</span>
+                  <span class="px-2 py-0.5 rounded bg-[var(--card)] border border-[var(--border)] text-[var(--accent)]">${st.badge}</span>
+                </div>
+                <p class="text-[var(--muted-foreground)] leading-relaxed">${st.detail}</p>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+
+        <!-- State Machine + Model Ladder -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+            <div>
+              <h2 class="text-base font-semibold">Máquina de Estados en Jira (Proyecto HUB)</h2>
+              <p class="text-xs text-[var(--muted-foreground)]">Transiciones ejecutadas por el Coordinador (en Swarm, el MCP <code>atlassian</code> está restringido a workers).</p>
+            </div>
+            <div class="space-y-2">
+              ${jiraStates.map(st => `
+                <div class="flex items-start justify-between gap-3 p-2.5 rounded-lg bg-[var(--content)] border border-[var(--border)] text-xs">
+                  <div class="space-y-0.5">
+                    <div class="font-semibold text-[var(--foreground)]">${st.name} <span class="font-mono text-[var(--muted-foreground)] font-normal">(ID ${st.id})</span></div>
+                    <div class="text-[var(--muted-foreground)]">${st.desc}</div>
+                  </div>
+                  <span class="shrink-0 px-2 py-0.5 rounded bg-[var(--card)] border border-[var(--border)] font-mono text-[var(--accent)]">${st.actor}</span>
+                </div>
+              `).join('')}
+            </div>
+          </section>
+
+          <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-4">
+            <div class="space-y-2">
+              <div>
+                <h2 class="text-base font-semibold">Escalera de Prioridad de Modelos (Maker y Checker)</h2>
+                <p class="text-xs text-[var(--muted-foreground)]">Configuración de mejores modelos primero; se desciende de nivel únicamente al agotar cuota.</p>
+              </div>
+              <div class="space-y-2">
+                ${ladder.map(l => `
+                  <div class="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-lg bg-[var(--content)] border border-[var(--border)] text-xs">
+                    <div>
+                      <span class="font-mono font-bold text-[var(--primary)] mr-1.5">${l.tier}</span>
+                      <span class="font-semibold text-[var(--foreground)]">${l.model}</span>
+                    </div>
+                    <span class="text-[var(--muted-foreground)]">${l.engine} · ${l.role}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="p-3 rounded-lg bg-[var(--content)] border border-[var(--border)] text-xs space-y-1.5">
+              <div class="font-semibold text-[var(--foreground)]">Regla de Oro de Auditoría Empírica (<code>pr-audit</code>)</div>
+              <p class="text-[var(--muted-foreground)] leading-relaxed">
+                Ningún bug 🔴 se reporta sin un test temporal de reproducción que falle en el worktree <code>-audit</code>. Si <code>BLOQUEANTES == 0</code> (🔴+🟠+🟡), el PR se aprueba automáticamente aunque existan NITs 🟢.
+              </p>
+            </div>
+          </section>
+        </div>
+
+        <!-- Worktrees & Gates Table -->
+        <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+          <div>
+            <h2 class="text-base font-semibold">Mapa de Entornos, Worktrees y Quality Gates</h2>
+            <p class="text-xs text-[var(--muted-foreground)]">Raíz actual: <code>C:\\dev\\projects\\proyectoClaude</code> (migrada desde OneDrive antes del Sprint 8).</p>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="border-b border-[var(--border)] text-[var(--muted-foreground)]">
+                  <th class="py-2 pr-3 font-semibold">Repositorio</th>
+                  <th class="py-2 px-3 font-semibold">Worktree Maker</th>
+                  <th class="py-2 px-3 font-semibold">Worktree Checker</th>
+                  <th class="py-2 px-3 font-semibold">Junctions NTFS</th>
+                  <th class="py-2 pl-3 font-semibold">Gates Obligatorios</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--border)]">
+                ${worktrees.map(w => `
+                  <tr>
+                    <td class="py-2.5 pr-3 font-mono font-semibold">${w.repo}</td>
+                    <td class="py-2.5 px-3 font-mono text-[var(--muted-foreground)]">${w.maker}</td>
+                    <td class="py-2.5 px-3 font-mono text-[var(--muted-foreground)]">${w.checker}</td>
+                    <td class="py-2.5 px-3 text-[var(--muted-foreground)]">${w.junctions}</td>
+                    <td class="py-2.5 pl-3 text-[var(--foreground)]">${w.gates}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      `;
+    }
+
     function renderView() {
       if (activeView === 'global') {
         renderGlobalView();
+      } else if (activeView === 'orchestration') {
+        renderOrchestrationView();
       } else {
         const s = sprints.find(x => x.id === activeView);
         if (s) renderSprintView(s);
