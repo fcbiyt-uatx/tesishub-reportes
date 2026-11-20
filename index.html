@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Histórico de Sprints (2–8) — TesisHub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --background: #f6f8fa;
+      --content: #f0f3f6;
+      --card: #ffffff;
+      --sidebar: #f6f8fa;
+      --border: #d0d7de;
+      --card-border: #d0d7de;
+      --foreground: #1f2328;
+      --muted-foreground: #656d76;
+      --code-foreground: #0550ae;
+      --primary: #1f883d;
+      --primary-foreground: #ffffff;
+      --secondary: #eaeef2;
+      --secondary-foreground: #1f2328;
+      --accent: #0969da;
+      --link: #0969da;
+      --success: #1a7f37;
+      --warning: #9a6700;
+      --error: #cf222e;
+      --chart-1: #0969da;
+      --chart-2: #1f883d;
+      --chart-3: #8250df;
+      --chart-4: #bf3989;
+      --chart-5: #0e7490;
+      --chart-6: #d97706;
+    }
+    html.dark {
+      --background: #0d1117;
+      --content: #161b22;
+      --card: #161b22;
+      --sidebar: #0d1117;
+      --border: #30363d;
+      --card-border: #30363d;
+      --foreground: #e6edf3;
+      --muted-foreground: #8b949e;
+      --code-foreground: #79c0ff;
+      --primary: #238636;
+      --primary-foreground: #ffffff;
+      --secondary: #21262d;
+      --secondary-foreground: #e6edf3;
+      --accent: #58a6ff;
+      --link: #58a6ff;
+      --success: #3fb950;
+      --warning: #d29922;
+      --error: #f85149;
+      --chart-1: #58a6ff;
+      --chart-2: #3fb950;
+      --chart-3: #a371f7;
+      --chart-4: #f778ba;
+      --chart-5: #39c5cf;
+      --chart-6: #f0883e;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Roboto, sans-serif;
+    }
+    .sprint-btn[aria-selected="true"] {
+      background: var(--primary);
+      color: var(--primary-foreground);
+      border-color: var(--primary);
+    }
+    .sprint-btn[aria-selected="false"] {
+      background: var(--card);
+      color: var(--muted-foreground);
+      border-color: var(--border);
+    }
+    .sprint-btn[aria-selected="false"]:hover {
+      color: var(--foreground);
+      border-color: var(--accent);
+    }
+    .chart-point {
+      cursor: pointer;
+      transition: r 0.15s ease;
+    }
+  </style>
+  <script>
+    (function initTheme() {
+      const saved = localStorage.getItem('tesishub-reports-theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('tesishub-reports-theme', isDark ? 'dark' : 'light');
+      const btn = document.getElementById('theme-toggle');
+      if (btn) btn.textContent = isDark ? '☀️ Modo claro' : '🌙 Modo oscuro';
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('theme-toggle');
+      if (btn) btn.textContent = document.documentElement.classList.contains('dark') ? '☀️ Modo claro' : '🌙 Modo oscuro';
+    });
+  </script>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased m-0 p-0">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <div class="flex flex-wrap items-center justify-between gap-2 text-xs pb-2">
+      <div class="flex items-center gap-2"><span class="font-semibold text-[var(--foreground)]">Panel Histórico (Sprints 2–8)</span><span class="text-[var(--muted-foreground)]">·</span><a href="./sprint-8.html" class="text-[var(--link)] hover:underline font-medium">Ver Timeline y Arquitectura Sprint 8 →</a></div>
+      <button id="theme-toggle" type="button" onclick="toggleTheme()" class="px-2.5 py-1 rounded-md bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] hover:border-[var(--accent)] transition-colors cursor-pointer">🌙 Modo oscuro</button>
+    </div>
+    <!-- Header -->
+    <header class="space-y-4 pb-4 border-b border-[var(--border)]">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-3">
+        <div class="space-y-1">
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <span class="px-2 py-0.5 rounded-full bg-[var(--card)] border border-[var(--border)] font-mono text-[var(--muted-foreground)]">TesisHub · Módulo 1</span>
+            <span class="px-2 py-0.5 rounded-full bg-[var(--card)] border border-[var(--success)] text-[var(--success)] font-medium">44 / 44 Historias Completadas</span>
+            <span class="text-[var(--muted-foreground)]">7 Sprints Documentados (Nov 2026)</span>
+          </div>
+          <h1 class="text-2xl font-bold tracking-tight">Panel Histórico de Sprints (2 – 8)</h1>
+          <p class="text-sm text-[var(--muted-foreground)]">
+            Explora la evolución acumulada del proyecto o selecciona cualquier sprint individual para revisar sus entregables, cobertura y hallazgos Maker–Checker.
+          </p>
+        </div>
+      </div>
+
+      <!-- Sprint Switcher -->
+      <nav id="sprint-nav" class="flex flex-wrap gap-2" role="tablist" aria-label="Selector de sprint"></nav>
+    </header>
+
+    <!-- Dynamic View Container -->
+    <main id="view-root" class="space-y-6"></main>
+  </div>
+
+  <script>
+    // ---------- HISTORICAL SPRINT DATA (100% from observed Sprint 2-8 reports) ----------
+    const sprints = [
+      {
+        id: 's2',
+        shortLabel: 'Sprint 2 (Tesis)',
+        title: 'Sprint 2 (Experimental) — Base Multi-Agente y Pirámide Frontend',
+        jiraId: 'Experimental',
+        date: '7–8 nov 2026',
+        sp: null,
+        storiesDone: 5,
+        storiesTotal: 5,
+        prsCount: 6,
+        avgRounds: '1.16 rondas/PR',
+        repos: ['tesishub-backend', 'tesishub-frontend'],
+        summary: 'Validación experimental del patrón Maker–Checker con pizarra Jira: seed persistido con anclas MDX (HUB-48), sincronización de diseño v0.34 y guías para agentes (HUB-82), cliente API tipado OpenAPI (HUB-52), catálogo de errores y toasts accesibles (HUB-69) y pirámide de pruebas E2E Playwright + CI (HUB-59).',
+        metrics: {
+          backTests: null,
+          frontJest: 199,
+          frontPlaywright: 5,
+          mdxValidador: 0,
+          infraE2e: 0,
+          backLines: 80,
+          backLinesNote: '≥ 80% (gate cumplido)',
+          frontStmts: 99.73,
+          frontBranches: 96.69,
+          bugsCaught: 2
+        },
+        coverageBars: [
+          { label: 'Frontend · Sentencias (Jest)', value: 99.73, color: 'var(--chart-2)' },
+          { label: 'Frontend · Ramas (Jest)', value: 96.69, color: 'var(--chart-3)' },
+          { label: 'Backend · Gate JaCoCo (mín.)', value: 80.0, color: 'var(--chart-1)' }
+        ],
+        orchestration: 'Claude Code CLI (Maker) + Antigravity Gemini (Checker) en worktrees aislados con junctions NTFS. 0% falsos positivos y 0 retransmisiones manuales.',
+        catches: [
+          'HUB-48 (Ronda 2): 2 bugs críticos interceptados empíricamente antes del merge (restricción users_email_key y fines de línea CRLF en MDX).'
+        ],
+        stories: [
+          { key: 'HUB-48', sp: null, area: 'Backend', pr: 'PR #18 (41a43f4)', rounds: '2 rondas', desc: 'Seed con Flyway V8 (start_column, quoted_text), fix users_email_key y CRLF en MDX.' },
+          { key: 'HUB-82', sp: null, area: 'Back + Front', pr: 'Back #19 · Front #5', rounds: '1 ronda', desc: 'Sincronización diseño v0.34 y contrato MDX v1.1 + AGENTS.md / CLAUDE.md.' },
+          { key: 'HUB-52', sp: null, area: 'Frontend', pr: 'PR #6 (7b63849)', rounds: '1 ronda', desc: 'Cliente API tipado generado desde OpenAPI, Page<T>, ProblemDetail y grupos.' },
+          { key: 'HUB-69', sp: null, area: 'Frontend', pr: 'PR #7 (b3fcbf2)', rounds: '1 ronda', desc: 'Catálogo de errores, traductor aMensaje, <app-error-message> y toasts accesibles.' },
+          { key: 'HUB-59', sp: null, area: 'Frontend', pr: 'PR #8 (2f540fc)', rounds: '1 ronda', desc: 'Suite E2E Playwright (5 escenarios smoke en 18.5 s) y CI multijob.' }
+        ]
+      },
+      {
+        id: 's3',
+        shortLabel: 'Sprint 3',
+        title: 'Sprint 3 — CU-01 Base, Validador ZIP RV-01..08 y Suite API Nivel 4',
+        jiraId: 'Sprint 3',
+        date: '13 nov 2026',
+        sp: null,
+        storiesDone: 7,
+        storiesTotal: 7,
+        prsCount: 7,
+        avgRounds: '1.14 rondas/PR',
+        repos: ['tesishub-backend', 'tesishub-frontend'],
+        summary: 'Implementación punta a punta de CU-01 (gestión de espacios de trabajo), catálogo de plantillas y validador seguro de ZIP (RV-01 a RV-08 con corpus de 34 archivos), emisor Fake Entra ID (HUB-83), suite HTTP caja negra REST Assured (HUB-84) y fixtures tipadas + Axe + CSP en frontend (HUB-85).',
+        metrics: {
+          backTests: 636,
+          frontJest: 285,
+          frontPlaywright: 41,
+          mdxValidador: 0,
+          infraE2e: 0,
+          backLines: 80,
+          backLinesNote: '≥ 80% (gate cumplido)',
+          frontStmts: 99.17,
+          frontBranches: null,
+          bugsCaught: 2
+        },
+        coverageBars: [
+          { label: 'Frontend · Sentencias HUB-85', value: 99.75, color: 'var(--chart-2)' },
+          { label: 'Frontend · Sentencias HUB-53', value: 99.17, color: 'var(--chart-2)' },
+          { label: 'Backend · Gate JaCoCo (mín.)', value: 80.0, color: 'var(--chart-1)' }
+        ],
+        orchestration: 'Orquestación autónoma Maker–Checker (Claude Code + Antigravity Gemini) y creación de worktrees dedicados para IDE (tesishub-backend-ide y tesishub-frontend-ide).',
+        catches: [
+          'HUB-87 (Ronda 2): Desbordamiento de 64 bits en acumulación de tamaños ZIP64 que burlaba RV-08 (test rv08RejectsZip64DeclaredSizesWhoseSumOverflowsLong).',
+          'HUB-87 (Ronda 2): Entradas declaradas en el directorio central omitidas en ZipInputStream (test rv01RejectsAZipWhoseDirectoryListsEntriesMissingFromTheStream → fix requireAllMet).'
+        ],
+        stories: [
+          { key: 'HUB-67', sp: null, area: 'Backend', pr: 'PR #20', rounds: '1 ronda', desc: 'CRUD plantillas institucionales, validador ZIP RV-01..07 (≥100 MB), /statistics y Flyway V9.' },
+          { key: 'HUB-87', sp: null, area: 'Backend', pr: 'PR #21', rounds: '2 rondas', desc: 'Corpus de 34 ZIPs, generador Python y regla RV-08 (bombas de compresión, symlinks, duplicados).' },
+          { key: 'HUB-43', sp: null, area: 'Backend', pr: 'PR #22', rounds: '1 ronda', desc: 'CU-01 Backend: 5 endpoints de proyectos, rollback transaccional VersioningPort y Flyway V10.' },
+          { key: 'HUB-83', sp: null, area: 'Back / Infra', pr: 'PR #23', rounds: '1 ronda', desc: 'Emisor sintético Fake Entra ID (6 personas, 6 defectos), perfil test-auth y TestAuthWithoutMockGuard.' },
+          { key: 'HUB-84', sp: null, area: 'Backend', pr: 'PR #24', rounds: '1 ronda', desc: 'Suite API Nivel 4 (REST Assured en contenedor, 89 tests HTTP, additionalProperties: false).' },
+          { key: 'HUB-85', sp: null, area: 'Frontend', pr: 'PR #9', rounds: '1 ronda', desc: 'Fixtures tipadas OpenAPI, RFC 9457, escaneo Axe (0 violaciones) y CSP en nginx.conf.' },
+          { key: 'HUB-53', sp: null, area: 'Frontend', pr: 'PR #10', rounds: '1 ronda', desc: 'CU-01 UI: panel ProjectList, filtros reactivos, permisos por rol, modal ProjectForm y archivado.' }
+        ]
+      },
+      {
+        id: 's4',
+        shortLabel: 'Sprint 4',
+        title: 'Sprint 4 — CU-02, Descargas Streaming, Matriz 28×7 y Schemathesis',
+        jiraId: 'ID 136',
+        date: '13 nov 2026',
+        sp: 23,
+        storiesDone: 6,
+        storiesTotal: 6,
+        prsCount: 6,
+        avgRounds: '1.17 rondas/PR',
+        repos: ['tesishub-backend', 'tesishub-frontend'],
+        summary: 'CU-02 de punta a punta (propuestas e iteraciones con regla D1 y bloqueo pesimista D4), descargas en streaming hasta 100 MB (HUB-79), matriz HTTP 28×7 = 196 celdas (HUB-50), fuzzing nocturno Schemathesis (HUB-86) y guards reactivos por permisos/relación en Angular (HUB-57).',
+        metrics: {
+          backTests: 1047,
+          frontJest: 366,
+          frontPlaywright: 55,
+          mdxValidador: 0,
+          infraE2e: 0,
+          backLines: 97.6,
+          backBranches: 89.0,
+          frontStmts: 97.16,
+          frontLines: 97.43,
+          bugsCaught: 3
+        },
+        coverageBars: [
+          { label: 'Backend · Líneas (HUB-44 JaCoCo)', value: 97.6, color: 'var(--chart-1)' },
+          { label: 'Backend · Ramas (HUB-44 JaCoCo)', value: 89.0, color: 'var(--chart-1)' },
+          { label: 'Frontend · Líneas (HUB-57 Jest)', value: 97.43, color: 'var(--chart-2)' },
+          { label: 'Frontend · Sentencias (HUB-57 Jest)', value: 97.16, color: 'var(--chart-2)' }
+        ],
+        orchestration: 'Claude Code CLI alcanzó límite de 5h tras HUB-50 → failover automático del Maker a Modelo Pro para HUB-86, HUB-54 y HUB-57; Checker efímero en Gemini Flash.',
+        catches: [
+          'HUB-86 (Schemathesis): 2 errores 500 ocultos detectados y corregidos (400 MALFORMED_REQUEST en query malformado y 422 TEMPLATE_NOT_AVAILABLE si falta archivo de plantilla).',
+          'HUB-57 (Ronda 2): Fallo de typecheck estricto (14 errores TS en specs por tipado CanActivateFn → corregido a Observable<boolean | UrlTree>).'
+        ],
+        stories: [
+          { key: 'HUB-44', sp: 5, area: 'Backend', pr: 'PR #25', rounds: '1 ronda', desc: 'CU-02 Backend: 5 endpoints, regla D1, validador RV-01..08, V11__iteration_warnings y 409 Retry-After.' },
+          { key: 'HUB-79', sp: 3, area: 'Backend', pr: 'PR #26', rounds: '1 ronda', desc: 'Descargas en streaming sin buffer (100 MB), RFC 5987 filename* y Cache-Control diferenciado.' },
+          { key: 'HUB-50', sp: 5, area: 'Backend', pr: 'PR #27', rounds: '1 ronda', desc: 'Matriz autorización 28×7 (196 celdas), ProjectsApiIT y TemplatesApiIT (620 integración).' },
+          { key: 'HUB-86', sp: 2, area: 'Back / CI', pr: 'PR #28', rounds: '1 ronda', desc: 'Workflow Schemathesis nocturno (03:00 UTC) y fix de 2 errores 500.' },
+          { key: 'HUB-54', sp: 5, area: 'Frontend', pr: 'PR #11', rounds: '1 ronda', desc: 'CU-02 UI: modales creación/iteración, progreso, anti-doble clic y traducción RV-01..08.' },
+          { key: 'HUB-57', sp: 3, area: 'Frontend', pr: 'PR #12', rounds: '2 rondas', desc: 'CurrentUserService, permissionGuard sin flash, ForbiddenInterceptor y pantalla ACCOUNT_BLOCKED.' }
+        ]
+      },
+      {
+        id: 's5',
+        shortLabel: 'Sprint 5',
+        title: 'Sprint 5 — Revisión IA (CU-03), Revisión Pares (CU-04), Validador MDX y Design System',
+        jiraId: 'ID 137',
+        date: '14 nov 2026',
+        sp: 20,
+        storiesDone: 5,
+        storiesTotal: 5,
+        prsCount: 5,
+        avgRounds: '1.00 rondas/PR',
+        repos: ['tesishub-backend', 'tesishub-frontend'],
+        summary: 'Capacidades de auditoría algorítmica por IA (HUB-45), revisión iterativa por pares con comentarios anclados y visor (HUB-46), validador de conformidad MDX v1.0 (HUB-77), descarga de archivos en UI (HUB-80) y aplicación integral del sistema de diseño DESIGN.md (HUB-58).',
+        metrics: {
+          backTests: 751,
+          frontJest: 426,
+          frontPlaywright: 60,
+          mdxValidador: 49,
+          infraE2e: 0,
+          backLines: 97.7,
+          backBranches: 89.6,
+          frontLines: 97.61,
+          frontBranches: 87.61,
+          bugsCaught: 0
+        },
+        coverageBars: [
+          { label: 'Backend · Líneas (HUB-45 JaCoCo)', value: 97.7, color: 'var(--chart-1)' },
+          { label: 'Backend · Ramas (HUB-45 JaCoCo)', value: 89.6, color: 'var(--chart-1)' },
+          { label: 'Frontend · Líneas (HUB-58 Jest)', value: 97.61, color: 'var(--chart-2)' },
+          { label: 'Frontend · Ramas (HUB-58 Jest)', value: 87.61, color: 'var(--chart-3)' }
+        ],
+        orchestration: 'Protocolo autónomo Maker–Checker en worktrees aislados; 100% de checks locales, GitHub Actions CI e impeccable detect (0 hallazgos) en verde.',
+        catches: [
+          'Cierre limpio sin bloqueantes pendientes; .gitattributes configurado con *.mdx text eol=lf (ARC-02) y URL.revokeObjectURL en finally (HUB-80).'
+        ],
+        stories: [
+          { key: 'HUB-45', sp: 5, area: 'Backend', pr: 'PR #29 (227d0bb)', rounds: '1 ronda', desc: 'CU-03: solicitud y recepción de revisión IA, matriz de 210 celdas, 487 unitarias + 658 integración.' },
+          { key: 'HUB-46', sp: 5, area: 'Backend', pr: 'PR #30 (969fa92)', rounds: '1 ronda', desc: 'CU-04 Backend: comentarios anclados, línea de tiempo y documento/media para visor.' },
+          { key: 'HUB-77', sp: 3, area: 'Front / Tooling', pr: 'PR #13 (e8ea186)', rounds: '1 ronda', desc: 'Validador de conformidad MDX v1.0 (49/49 pruebas integradas en CI).' },
+          { key: 'HUB-80', sp: 2, area: 'Frontend', pr: 'PR #14 (f3dd72a)', rounds: '1 ronda', desc: 'Descarga de archivos de proyecto e iteración con Content-Disposition UTF-8.' },
+          { key: 'HUB-58', sp: 5, area: 'Frontend', pr: 'PR #15 (60a759b)', rounds: '1 ronda', desc: 'Sistema de diseño DESIGN.md aplicado a todos los componentes (StatusPill, Tabs WAI-ARIA, CommentCard).' }
+        ]
+      },
+      {
+        id: 's6',
+        shortLabel: 'Sprint 6',
+        title: 'Sprint 6 — Aprobación/Fusión (CU-05), SSE + SMTP y Spike Diffs MDX (HUB-68)',
+        jiraId: 'ID 138',
+        date: '14 nov 2026',
+        sp: 23,
+        storiesDone: 5,
+        storiesTotal: 5,
+        prsCount: 6,
+        avgRounds: '1.20 rondas/PR',
+        repos: ['tesishub-backend', 'tesishub-frontend'],
+        summary: 'Flujo completo de aprobación y fusión (CU-05) en backend y frontend, notificaciones SSE en tiempo real + correo SMTP diferido a AFTER_COMMIT (HUB-49, HUB-56), pestaña Conversación y panel Revisión (HUB-55), y Spike HUB-68 con PoC de diffs renderizados MDX y mediciones de rendimiento.',
+        metrics: {
+          backTests: 799,
+          frontJest: 532,
+          frontPlaywright: 71,
+          mdxValidador: 49,
+          infraE2e: 0,
+          backLines: 97.42,
+          frontStmts: 97.46,
+          frontLines: 97.87,
+          frontBranches: 90.44,
+          bugsCaught: 1
+        },
+        coverageBars: [
+          { label: 'Backend · Instrucciones (JaCoCo)', value: 97.58, color: 'var(--chart-1)' },
+          { label: 'Backend · Líneas (JaCoCo)', value: 97.42, color: 'var(--chart-1)' },
+          { label: 'Frontend · Líneas (Jest)', value: 97.87, color: 'var(--chart-2)' },
+          { label: 'Frontend · Sentencias (Jest)', value: 97.46, color: 'var(--chart-2)' },
+          { label: 'Frontend · Ramas (Jest)', value: 90.44, color: 'var(--chart-3)' }
+        ],
+        orchestration: 'Maker–Checker autónomo; al concluir el último cierre, Claude Code CLI alcanzó su límite de 5h (resets 9:30am), dejando documentadas las transiciones finales en el reporte.',
+        catches: [
+          'HUB-47 requirió PR de corrección #32 (5cce201) para afinar reglas de aprobación/fusión.',
+          'Spike HUB-68 midió 95 ms (1 cap) / 295 ms (5 caps) en CPU x1, detectó necesidad de quitar acorn (852 kB → 588 kB), subir KaTeX ≥ 0.18.2 y eliminar bypassSecurityTrustHtml en HUB-88.'
+        ],
+        stories: [
+          { key: 'HUB-47', sp: 5, area: 'Backend', pr: 'PR #31 + fix #32', rounds: '2 rondas', desc: 'CU-05: aprobación y fusión, locks pesimistas, reglas D1/D3, 409 BASELINE_CHANGED y OPEN_COMMENTS_EXIST.' },
+          { key: 'HUB-49', sp: 5, area: 'Backend', pr: 'PR #33 (adb1aed)', rounds: '1 ronda', desc: 'Notificaciones SSE + correo SMTP AFTER_COMMIT verificado con GreenMail (matriz 279/279).' },
+          { key: 'HUB-56', sp: 3, area: 'Frontend', pr: 'PR #16 (93c56ef)', rounds: '1 ronda', desc: 'Cliente streaming SSE con HttpClient + UpdatedBadge.' },
+          { key: 'HUB-55', sp: 5, area: 'Frontend', pr: 'PR #17 (33de262)', rounds: '1 ronda', desc: 'Detalle de propuesta: pestaña Conversación, panel Revisión y acciones CU-03/CU-05.' },
+          { key: 'HUB-68', sp: 5, area: 'Front (Spike)', pr: 'PR #18 (1f002f0)', rounds: '1 ronda', desc: 'PoC /poc/diff, informe de 8 preguntas, benchmarks y decisiones arquitectónicas para HUB-88.' }
+        ]
+      },
+      {
+        id: 's7',
+        shortLabel: 'Sprint 7',
+        title: 'Sprint 7 — Contratos v0.3/MDX v1.2, WireMock+Traefik, Comentarios Generales y Admin',
+        jiraId: 'ID 139',
+        date: '17–18 nov 2026',
+        sp: 28,
+        storiesDone: 11,
+        storiesTotal: 11,
+        prsCount: 15,
+        avgRounds: '1.27 rondas/PR',
+        repos: ['tesishub-backend', 'tesishub-frontend', 'tesishub-infra'],
+        summary: 'Mayor volumen de historias del proyecto (11/11, 28 SP): alineación con contratos v0.3 y MDX v1.2 (HUB-95, HUB-97, HUB-64), entorno HTTP WireMock + Traefik dinámico + worker RabbitMQ (HUB-61, HUB-92, HUB-93), catálogo de categorías D8 (HUB-96), comentarios generales V15 (HUB-98) y dashboard de administración DC-10-00 (HUB-89, HUB-90, HUB-91).',
+        metrics: {
+          backTests: 1480,
+          frontJest: 716,
+          frontPlaywright: 93,
+          mdxValidador: 93,
+          infraE2e: 0,
+          backLines: 97.45,
+          backBranches: 89.90,
+          frontStmts: 97.78,
+          frontLines: 98.13,
+          frontBranches: 90.59,
+          bugsCaught: 3
+        },
+        coverageBars: [
+          { label: 'Backend · Líneas (JaCoCo)', value: 97.45, color: 'var(--chart-1)' },
+          { label: 'Backend · Ramas (JaCoCo)', value: 89.90, color: 'var(--chart-1)' },
+          { label: 'Frontend · Líneas (Jest)', value: 98.13, color: 'var(--chart-2)' },
+          { label: 'Frontend · Sentencias (Jest)', value: 97.78, color: 'var(--chart-2)' },
+          { label: 'Frontend · Funciones (Jest)', value: 96.82, color: 'var(--chart-2)' },
+          { label: 'Frontend · Ramas (Jest)', value: 90.59, color: 'var(--chart-3)' }
+        ],
+        orchestration: 'Ejecución multi-repositorio coordinada (Backend + Frontend + Infra) con auditorías empíricas en worktrees aislados y validación Docker en vivo (RestartCount=0 en conmutación Traefik).',
+        catches: [
+          'HUB-95 (Ronda 1): FRONTMATTER_REGEX no detectaba frontmatter con CRLF (\\r\\n).',
+          'HUB-89 (Ronda 1): Transición CSS de color en .filter generaba fallo intermitente color-contrast en axe-core durante E2E.',
+          'HUB-98 Backend (Ronda 1): Falta de blankAllowed = true en @Text devolvía INVALID_REQUEST en lugar de INCOMPLETE_COMMENT_ANCHOR.'
+        ],
+        stories: [
+          { key: 'HUB-95', sp: 2, area: 'Frontend', pr: 'Front #19 (f67a72a)', rounds: '2 rondas', desc: 'Validador MDX v1.2 (93/93 tests) con fix CRLF.' },
+          { key: 'HUB-97', sp: 1, area: 'Backend', pr: 'Back #34 (91edf16)', rounds: '1 ronda', desc: 'Raíces \\documentclass{preview} y anclaje exacto en fórmulas UTF-16.' },
+          { key: 'HUB-93', sp: 1, area: 'Back + Front', pr: 'Back #35 · Front #20', rounds: '1 ronda', desc: 'Exposición CORS de cabeceras Content-Disposition y Retry-After.' },
+          { key: 'HUB-64', sp: 2, area: 'Backend', pr: 'Back #36 (78a01fb)', rounds: '1 ronda', desc: 'Contract testing Pact v0.3 y remoción de /comparisons.' },
+          { key: 'HUB-91', sp: 3, area: 'Frontend', pr: 'Front #21 (cf9e21e)', rounds: '1 ronda', desc: 'Contadores del dashboard de administración (USER_MANAGE).' },
+          { key: 'HUB-89', sp: 3, area: 'Frontend', pr: 'Front #22 (ea34fed)', rounds: '2 rondas', desc: 'Administración de plantillas institucionales (DC-10-00).' },
+          { key: 'HUB-92', sp: 2, area: 'Back + Infra', pr: 'Back #37 · Infra #3', rounds: '1 ronda', desc: 'Volumen persistente templates-data en /var/lib/tesishub/templates.' },
+          { key: 'HUB-61', sp: 5, area: 'Back + Infra', pr: 'Back #38 · Infra #4', rounds: '1 ronda', desc: 'docker-compose.http-mocks.yml con Traefik dinámico, WireMock :ro y worker IA.' },
+          { key: 'HUB-96', sp: 3, area: 'Backend', pr: 'Back #39 (4b64927)', rounds: '1 ronda', desc: 'Catálogo de categorías de comentarios V14 y GET /comment-categories.' },
+          { key: 'HUB-90', sp: 3, area: 'Back + Front', pr: 'Front #23 · Back #40', rounds: '1 ronda', desc: 'Administración de usuarios e invitaciones sin PII en URLs + códigos 409.' },
+          { key: 'HUB-98', sp: 3, area: 'Back + Front', pr: 'Back #40 · Front #24', rounds: '2 rondas', desc: 'Comentarios generales V15 todo-o-nada y componente reutilizable app-comment-form.' }
+        ]
+      },
+      {
+        id: 's8',
+        shortLabel: 'Sprint 8',
+        title: 'Sprint 8 — Visor MDX en Papel, Comentarios Anclados y E2E Docker Completo',
+        jiraId: 'ID 140',
+        date: '20 nov 2026',
+        sp: 26,
+        storiesDone: 5,
+        storiesTotal: 5,
+        prsCount: 6,
+        avgRounds: '1.33 rondas/PR',
+        repos: ['tesishub-backend', 'tesishub-frontend', 'tesishub-infra'],
+        summary: 'Cierre completo de CU-04 con visor MDX en papel sin innerHTML (Web Worker, KaTeX 0.18.11, blob: + CSP), comentarios en margen y sobre selección en code points (HUB-100), limpieza de copy MVP y navegación (HUB-101, HUB-94), y suite E2E Playwright contra contenedores Docker reales (HUB-63).',
+        metrics: {
+          backTests: 1507,
+          frontJest: 822,
+          frontPlaywright: 106,
+          mdxValidador: 93,
+          infraE2e: 8,
+          backLines: 97.44,
+          backBranches: 89.84,
+          frontStmts: 95.08,
+          frontLines: 95.61,
+          frontBranches: 81.53,
+          bugsCaught: 10
+        },
+        coverageBars: [
+          { label: 'Backend · Líneas (JaCoCo)', value: 97.44, color: 'var(--chart-1)' },
+          { label: 'Backend · Ramas (JaCoCo)', value: 89.84, color: 'var(--chart-1)' },
+          { label: 'Frontend · Funciones (Jest)', value: 96.05, color: 'var(--chart-2)' },
+          { label: 'Frontend · Líneas (Jest)', value: 95.61, color: 'var(--chart-2)' },
+          { label: 'Frontend · Sentencias (Jest)', value: 95.08, color: 'var(--chart-2)' },
+          { label: 'Frontend · Ramas (Jest)', value: 81.53, color: 'var(--chart-3)' }
+        ],
+        orchestration: 'Claude Code CLI (Opus 5.5 xhigh) → failover a Swarm UI a las 01:42 CST tras límite semanal → Sonnet 5.5 (429) → Gemini 4 Argon High → Gemini 4 Neon High/XHigh (Nivel 5 Flash 3.8 intacto al 34%).',
+        catches: [
+          'HUB-100 (Ronda 1 → 2): 6 🔴 bugs de anclaje confirmados con Jest (JSX multilínea, autocerrados vacíos, listas ANC-06, notas [1] vs [^1], 2da ocurrencia repetida y «Sobre texto eliminado»).',
+          'HUB-63 (Ronda 1 → 2): 2 🔴 bugs (yq v4 en infra-ci.yml y carrera waitForTimeout(150)) + 2 🟡 calidad (BACKEND_DIR / Windows README y helper createWorkspace).'
+        ],
+        stories: [
+          { key: 'HUB-101', sp: 1, area: 'Frontend', pr: 'Front #25 (9d4ca83)', rounds: '1 ronda', desc: 'Eliminada mención al «MVP» al archivar plantilla + guardia visible-copy.spec.ts.' },
+          { key: 'HUB-94', sp: 1, area: 'Frontend', pr: 'Front #26 (edecbae)', rounds: '1 ronda', desc: 'Navegación principal en encabezado con aria-current y ocultamiento para BLOCKED.' },
+          { key: 'HUB-88', sp: 8, area: 'Back + Front', pr: 'Back #41 · Front #27', rounds: '1 ronda', desc: 'Endpoint base/document (v0.41) + visor MDX HAST puro, Worker, KaTeX 0.18.11 y WCAG 1.4.1.' },
+          { key: 'HUB-100', sp: 8, area: 'Frontend', pr: 'Front #28 (d3e4870)', rounds: '2 rondas', desc: 'Comentarios en margen (>=1400 px) / párrafo (<=1024 px), selección Unicode y colapsado.' },
+          { key: 'HUB-63', sp: 8, area: 'Infra', pr: 'Infra #5 (1b84adc)', rounds: '2 rondas', desc: 'Suite E2E Playwright CU-01..CU-05 contra Docker real (8/8 en 22.9 s) + e2e-mock.yml.' }
+        ]
+      }
+    ];
+
+    let activeView = 'global';
+
+    function renderNav() {
+      const nav = document.getElementById('sprint-nav');
+      const items = [
+        { id: 'global', label: 'Vista Global (Sprints 2–8)' },
+        ...sprints.map(s => ({ id: s.id, label: s.shortLabel }))
+      ];
+      nav.innerHTML = items.map(it => `
+        <button class="sprint-btn px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors"
+                role="tab" aria-selected="${it.id === activeView}" data-view="${it.id}">
+          ${it.label}
+        </button>
+      `).join('');
+
+      nav.querySelectorAll('button').forEach(b => {
+        b.addEventListener('click', () => {
+          activeView = b.dataset.view;
+          renderNav();
+          renderView();
+        });
+      });
+    }
+
+    // ---------- GLOBAL VIEW ----------
+    function renderGlobalView() {
+      const totalStories = sprints.reduce((a, s) => a + s.storiesDone, 0);
+      const totalPrs = sprints.reduce((a, s) => a + s.prsCount, 0);
+      const totalBugs = sprints.reduce((a, s) => a + s.metrics.bugsCaught, 0);
+      const totalSpKnown = sprints.reduce((a, s) => a + (s.sp || 0), 0);
+
+      document.getElementById('view-root').innerHTML = `
+        <!-- Global KPIs -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1.5">
+            <div class="text-xs text-[var(--muted-foreground)]">Historias Finalizadas</div>
+            <div class="text-2xl font-bold tabular-nums">${totalStories} / ${totalStories} <span class="text-xs font-mono text-[var(--success)]">100%</span></div>
+            <p class="text-xs text-[var(--muted-foreground)]">${totalSpKnown} SP registrados entre Sprints 4 y 8 (S2–S3 sin SP en reporte).</p>
+          </div>
+          <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1.5">
+            <div class="text-xs text-[var(--muted-foreground)]">Pull Requests Auditados</div>
+            <div class="text-2xl font-bold tabular-nums">${totalPrs} <span class="text-sm font-normal text-[var(--muted-foreground)]">PRs</span></div>
+            <p class="text-xs text-[var(--muted-foreground)]">Coordinación multi-repo en backend, frontend e infra.</p>
+          </div>
+          <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1.5">
+            <div class="text-xs text-[var(--muted-foreground)]">Crecimiento Suite de Pruebas</div>
+            <div class="text-2xl font-bold tabular-nums">204 → 2,536</div>
+            <p class="text-xs text-[var(--muted-foreground)]">Multiplicado ×12.4 entre Sprint 2 y Sprint 8 con 0 fallos.</p>
+          </div>
+          <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1.5">
+            <div class="text-xs text-[var(--muted-foreground)]">Bloqueantes Atrapados</div>
+            <div class="text-2xl font-bold tabular-nums">${totalBugs} <span class="text-sm font-normal text-[var(--muted-foreground)]">pre-merge</span></div>
+            <p class="text-xs text-[var(--muted-foreground)]">Interceptados con tests empíricos antes de llegar a <code>develop</code>.</p>
+          </div>
+        </section>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <h2 class="text-base font-semibold">Crecimiento Acumulado de Pruebas (Sprints 2–8)</h2>
+                <p class="text-xs text-[var(--muted-foreground)]">Evolución de tests en Backend (Surefire+Failsafe), Frontend Jest y Playwright/Validador.</p>
+              </div>
+              <div class="flex flex-wrap gap-2 text-xs text-[var(--muted-foreground)]">
+                <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm" style="background:var(--chart-1)"></span>Backend</span>
+                <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm" style="background:var(--chart-2)"></span>Jest</span>
+                <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm" style="background:var(--chart-3)"></span>E2E/MDX</span>
+              </div>
+            </div>
+            <div id="global-tests-chart" class="w-full"></div>
+          </section>
+
+          <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <h2 class="text-base font-semibold">Historias y Bloqueantes Atrapados por Sprint</h2>
+                <p class="text-xs text-[var(--muted-foreground)]">Volumen entregado vs. defectos interceptados por el Checker antes del merge.</p>
+              </div>
+              <div class="flex flex-wrap gap-2 text-xs text-[var(--muted-foreground)]">
+                <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm" style="background:var(--chart-4)"></span>Historias</span>
+                <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm" style="background:var(--error)"></span>Bloqueantes</span>
+              </div>
+            </div>
+            <div id="global-stories-chart" class="w-full"></div>
+          </section>
+        </div>
+
+        <!-- Sprint Summary Cards -->
+        <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+          <div>
+            <h2 class="text-base font-semibold">Mapa Rápido de Sprints (clic para abrir el detalle)</h2>
+            <p class="text-xs text-[var(--muted-foreground)]">Resumen ejecutivo de cada iteración del desarrollo multi-agente.</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            ${sprints.map(s => `
+              <button type="button" onclick="openSprint('${s.id}')" class="text-left p-4 rounded-xl bg-[var(--content)] border border-[var(--border)] hover:border-[var(--primary)] transition-colors space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-bold text-sm text-[var(--foreground)]">${s.shortLabel}</span>
+                  <span class="text-xs font-mono px-2 py-0.5 rounded bg-[var(--card)] border border-[var(--border)] text-[var(--success)]">${s.storiesDone}/${s.storiesTotal}${s.sp ? ' · ' + s.sp + ' SP' : ''}</span>
+                </div>
+                <p class="text-xs text-[var(--muted-foreground)] line-clamp-3 leading-relaxed">${s.summary}</p>
+                <div class="flex items-center justify-between text-xs pt-1 border-t border-[var(--border)] text-[var(--muted-foreground)]">
+                  <span>${s.prsCount} PRs · ${s.metrics.bugsCaught} bloq. atrapados</span>
+                  <span class="text-[var(--link)] font-medium">Ver detalle →</span>
+                </div>
+              </button>
+            `).join('')}
+          </div>
+        </section>
+      `;
+
+      drawGlobalTestsChart();
+      drawGlobalStoriesChart();
+    }
+
+    window.openSprint = (id) => {
+      activeView = id;
+      renderNav();
+      renderView();
+    };
+
+    function drawGlobalTestsChart() {
+      const container = document.getElementById('global-tests-chart');
+      const w = 520, h = 240, padL = 44, padR = 16, padT = 18, padB = 34;
+      const chartW = w - padL - padR, chartH = h - padT - padB;
+      const maxVal = 2600;
+      const barW = 36;
+      const step = chartW / sprints.length;
+
+      let svg = `<svg viewBox="0 0 ${w} ${h}" class="w-full h-auto" role="img" aria-label="Crecimiento acumulado de pruebas por sprint">`;
+      [0, 650, 1300, 1950, 2600].forEach(t => {
+        const y = padT + chartH - (t / maxVal) * chartH;
+        svg += `<line x1="${padL}" y1="${y}" x2="${w - padR}" y2="${y}" stroke="var(--border)" stroke-width="1" />`;
+        svg += `<text x="${padL - 6}" y="${y + 4}" text-anchor="end" fill="var(--muted-foreground)" font-size="10.5" font-family="monospace">${t}</text>`;
+      });
+
+      sprints.forEach((s, i) => {
+        const cx = padL + i * step + step / 2;
+        const x = cx - barW / 2;
+        const back = s.metrics.backTests || 0;
+        const jest = s.metrics.frontJest || 0;
+        const e2e = (s.metrics.frontPlaywright || 0) + (s.metrics.mdxValidador || 0) + (s.metrics.infraE2e || 0);
+        const total = back + jest + e2e;
+
+        let curY = padT + chartH;
+        [
+          { val: back, c: 'var(--chart-1)' },
+          { val: jest, c: 'var(--chart-2)' },
+          { val: e2e, c: 'var(--chart-3)' }
+        ].forEach(seg => {
+          if (seg.val > 0) {
+            const sh = (seg.val / maxVal) * chartH;
+            curY -= sh;
+            svg += `<rect x="${x}" y="${curY}" width="${barW}" height="${sh}" rx="2" fill="${seg.c}" />`;
+          }
+        });
+
+        svg += `<text x="${cx}" y="${curY - 5}" text-anchor="middle" fill="var(--foreground)" font-size="10.5" font-weight="600" font-family="monospace">${total}</text>`;
+        svg += `<text x="${cx}" y="${h - 12}" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">${s.id.toUpperCase()}</text>`;
+      });
+
+      svg += `</svg>`;
+      container.innerHTML = svg;
+    }
+
+    function drawGlobalStoriesChart() {
+      const container = document.getElementById('global-stories-chart');
+      const w = 520, h = 240, padL = 34, padR = 16, padT = 18, padB = 34;
+      const chartW = w - padL - padR, chartH = h - padT - padB;
+      const maxVal = 12;
+      const step = chartW / sprints.length;
+      const bw = 18;
+
+      let svg = `<svg viewBox="0 0 ${w} ${h}" class="w-full h-auto" role="img" aria-label="Historias completadas y bloqueantes atrapados por sprint">`;
+      [0, 3, 6, 9, 12].forEach(t => {
+        const y = padT + chartH - (t / maxVal) * chartH;
+        svg += `<line x1="${padL}" y1="${y}" x2="${w - padR}" y2="${y}" stroke="var(--border)" stroke-width="1" />`;
+        svg += `<text x="${padL - 6}" y="${y + 4}" text-anchor="end" fill="var(--muted-foreground)" font-size="10.5" font-family="monospace">${t}</text>`;
+      });
+
+      sprints.forEach((s, i) => {
+        const cx = padL + i * step + step / 2;
+        const sh1 = (s.storiesDone / maxVal) * chartH;
+        const sh2 = (s.metrics.bugsCaught / maxVal) * chartH;
+        const y1 = padT + chartH - sh1;
+        const y2 = padT + chartH - sh2;
+
+        svg += `<rect x="${cx - bw - 2}" y="${y1}" width="${bw}" height="${sh1}" rx="3" fill="var(--chart-4)" />`;
+        svg += `<text x="${cx - bw / 2 - 2}" y="${y1 - 4}" text-anchor="middle" fill="var(--foreground)" font-size="10.5" font-weight="600">${s.storiesDone}</text>`;
+
+        if (sh2 > 0) {
+          svg += `<rect x="${cx + 2}" y="${y2}" width="${bw}" height="${sh2}" rx="3" fill="var(--error)" />`;
+          svg += `<text x="${cx + bw / 2 + 2}" y="${y2 - 4}" text-anchor="middle" fill="var(--error)" font-size="10.5" font-weight="700">${s.metrics.bugsCaught}</text>`;
+        } else {
+          svg += `<text x="${cx + bw / 2 + 2}" y="${padT + chartH - 4}" text-anchor="middle" fill="var(--muted-foreground)" font-size="10">0</text>`;
+        }
+
+        svg += `<text x="${cx}" y="${h - 12}" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">${s.id.toUpperCase()}</text>`;
+      });
+      svg += `</svg>`;
+      container.innerHTML = svg;
+    }
+
+    // ---------- INDIVIDUAL SPRINT VIEW ----------
+    function renderSprintView(s) {
+      const totalTests = (s.metrics.backTests || 0) + (s.metrics.frontJest || 0) + (s.metrics.frontPlaywright || 0) + (s.metrics.mdxValidador || 0) + (s.metrics.infraE2e || 0);
+      document.getElementById('view-root').innerHTML = `
+        <!-- Sprint Banner -->
+        <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-2">
+          <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-[var(--content)] border border-[var(--border)] font-mono">${s.jiraId}</span>
+              <span class="px-2 py-0.5 rounded bg-[var(--content)] border border-[var(--success)] text-[var(--success)] font-medium">100% Completado</span>
+              <span class="text-[var(--muted-foreground)]">${s.date}</span>
+            </div>
+            <span class="font-mono text-[var(--muted-foreground)]">${s.repos.join(' · ')}</span>
+          </div>
+          <h2 class="text-lg font-bold">${s.title}</h2>
+          <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">${s.summary}</p>
+        </section>
+
+        <!-- Sprint KPIs -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1">
+            <div class="text-xs text-[var(--muted-foreground)]">Historias / Puntos</div>
+            <div class="text-2xl font-bold tabular-nums">${s.storiesDone} / ${s.storiesTotal} ${s.sp ? `<span class="text-sm font-normal text-[var(--muted-foreground)]">(${s.sp} SP)</span>` : ''}</div>
+            <div class="text-xs text-[var(--muted-foreground)]">${s.prsCount} PRs fusionados · ${s.avgRounds}</div>
+          </div>
+          <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1">
+            <div class="text-xs text-[var(--muted-foreground)]">Pruebas al Cierre</div>
+            <div class="text-2xl font-bold tabular-nums">${totalTests.toLocaleString('es-MX')}</div>
+            <div class="text-xs text-[var(--muted-foreground)]">
+              ${s.metrics.backTests ? `Back ${s.metrics.backTests} · ` : ''}Jest ${s.metrics.frontJest} · E2E ${s.metrics.frontPlaywright + s.metrics.infraE2e}${s.metrics.mdxValidador ? ` · MDX ${s.metrics.mdxValidador}` : ''}
+            </div>
+          </div>
+          <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1">
+            <div class="text-xs text-[var(--muted-foreground)]">Bloqueantes Atrapados</div>
+            <div class="text-2xl font-bold tabular-nums">${s.metrics.bugsCaught}</div>
+            <div class="text-xs text-[var(--muted-foreground)]">Resueltos en ciclo Checker antes del merge.</div>
+          </div>
+          <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1">
+            <div class="text-xs text-[var(--muted-foreground)]">Calidad y Accesibilidad</div>
+            <div class="text-2xl font-bold tabular-nums text-[var(--success)]">Gate OK</div>
+            <div class="text-xs text-[var(--muted-foreground)]">Cobertura ≥ 80% · 0 violaciones Axe · CI verde.</div>
+          </div>
+        </section>
+
+        <!-- Coverage + Checker Highlights -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-semibold">Cobertura Registrada vs. Umbral (80%)</h3>
+              <span class="text-xs font-mono text-[var(--warning)]">Gate 80%</span>
+            </div>
+            <div id="sprint-coverage-chart" class="w-full"></div>
+          </section>
+
+          <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-4">
+            <div class="space-y-1.5">
+              <h3 class="text-sm font-semibold">Orquestación Multi-Agente en este Sprint</h3>
+              <p class="text-xs text-[var(--muted-foreground)] leading-relaxed p-3 rounded-lg bg-[var(--content)] border border-[var(--border)]">${s.orchestration}</p>
+            </div>
+            <div class="space-y-1.5">
+              <h3 class="text-sm font-semibold">Hallazgos Empíricos Relevantes</h3>
+              <ul class="list-disc pl-5 space-y-1.5 text-xs text-[var(--muted-foreground)] leading-relaxed">
+                ${s.catches.map(c => `<li>${c}</li>`).join('')}
+              </ul>
+            </div>
+          </section>
+        </div>
+
+        <!-- Stories List -->
+        <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+          <h3 class="text-sm font-semibold">Historias Entregadas (${s.stories.length})</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            ${s.stories.map(st => `
+              <div class="p-3.5 rounded-lg bg-[var(--content)] border border-[var(--border)] space-y-1.5 text-xs">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-mono font-bold px-2 py-0.5 rounded bg-[var(--card)] border border-[var(--border)]">${st.key}</span>
+                    <span class="px-1.5 py-0.5 rounded bg-[var(--card)] border border-[var(--border)] text-[var(--muted-foreground)]">${st.area}</span>
+                    ${st.sp ? `<span class="font-mono text-[var(--muted-foreground)]">${st.sp} SP</span>` : ''}
+                  </div>
+                  <span class="font-mono text-[var(--success)]">${st.rounds}</span>
+                </div>
+                <p class="text-[var(--foreground)] leading-relaxed">${st.desc}</p>
+                <div class="font-mono text-[var(--muted-foreground)]">${st.pr}</div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `;
+
+      drawSprintCoverage(s.coverageBars);
+    }
+
+    function drawSprintCoverage(bars) {
+      const container = document.getElementById('sprint-coverage-chart');
+      const rowH = 38, padL = 205, padR = 54, padT = 12, padB = 26;
+      const w = 520, h = padT + bars.length * rowH + padB;
+      const chartW = w - padL - padR;
+      const xOf = (v) => padL + (v / 100) * chartW;
+
+      let svg = `<svg viewBox="0 0 ${w} ${h}" class="w-full h-auto" role="img" aria-label="Cobertura del sprint">`;
+      [0, 50, 80, 100].forEach(t => {
+        const x = xOf(t);
+        const isGate = t === 80;
+        svg += `<line x1="${x}" y1="${padT - 4}" x2="${x}" y2="${h - padB}" stroke="${isGate ? 'var(--warning)' : 'var(--border)'}" stroke-width="${isGate ? 1.5 : 1}" ${isGate ? 'stroke-dasharray="4 3"' : ''} />`;
+        svg += `<text x="${x}" y="${h - 8}" text-anchor="middle" fill="${isGate ? 'var(--warning)' : 'var(--muted-foreground)'}" font-size="11" font-weight="${isGate ? '700' : '400'}">${t}%</text>`;
+      });
+
+      bars.forEach((d, i) => {
+        const y = padT + i * rowH + 8;
+        const bw = (d.value / 100) * chartW;
+        svg += `<text x="${padL - 10}" y="${y + 13}" text-anchor="end" fill="var(--foreground)" font-size="11.5">${d.label}</text>`;
+        svg += `<rect x="${padL}" y="${y}" width="${chartW}" height="18" rx="4" fill="var(--content)" />`;
+        svg += `<rect x="${padL}" y="${y}" width="${bw}" height="18" rx="4" fill="${d.color}" />`;
+        svg += `<text x="${padL + bw + 6}" y="${y + 13}" fill="var(--foreground)" font-size="11.5" font-weight="600" font-family="monospace">${d.value.toFixed(2)}%</text>`;
+      });
+      svg += `</svg>`;
+      container.innerHTML = svg;
+    }
+
+    function renderView() {
+      if (activeView === 'global') {
+        renderGlobalView();
+      } else {
+        const s = sprints.find(x => x.id === activeView);
+        if (s) renderSprintView(s);
+      }
+    }
+
+    renderNav();
+    renderView();
+  </script>
+</body>
+</html>

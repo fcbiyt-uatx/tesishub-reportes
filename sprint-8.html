@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reporte Sprint 8 — TesisHub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --background: #f6f8fa;
+      --content: #f0f3f6;
+      --card: #ffffff;
+      --sidebar: #f6f8fa;
+      --border: #d0d7de;
+      --card-border: #d0d7de;
+      --foreground: #1f2328;
+      --muted-foreground: #656d76;
+      --code-foreground: #0550ae;
+      --primary: #1f883d;
+      --primary-foreground: #ffffff;
+      --secondary: #eaeef2;
+      --secondary-foreground: #1f2328;
+      --accent: #0969da;
+      --link: #0969da;
+      --success: #1a7f37;
+      --warning: #9a6700;
+      --error: #cf222e;
+      --chart-1: #0969da;
+      --chart-2: #1f883d;
+      --chart-3: #8250df;
+      --chart-4: #bf3989;
+      --chart-5: #0e7490;
+      --chart-6: #d97706;
+    }
+    html.dark {
+      --background: #0d1117;
+      --content: #161b22;
+      --card: #161b22;
+      --sidebar: #0d1117;
+      --border: #30363d;
+      --card-border: #30363d;
+      --foreground: #e6edf3;
+      --muted-foreground: #8b949e;
+      --code-foreground: #79c0ff;
+      --primary: #238636;
+      --primary-foreground: #ffffff;
+      --secondary: #21262d;
+      --secondary-foreground: #e6edf3;
+      --accent: #58a6ff;
+      --link: #58a6ff;
+      --success: #3fb950;
+      --warning: #d29922;
+      --error: #f85149;
+      --chart-1: #58a6ff;
+      --chart-2: #3fb950;
+      --chart-3: #a371f7;
+      --chart-4: #f778ba;
+      --chart-5: #39c5cf;
+      --chart-6: #f0883e;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Roboto, sans-serif;
+    }
+    .tab-btn[aria-selected="true"] {
+      background: var(--primary);
+      color: var(--primary-foreground);
+      border-color: var(--primary);
+    }
+    .tab-btn[aria-selected="false"] {
+      background: var(--card);
+      color: var(--muted-foreground);
+      border-color: var(--border);
+    }
+    .tab-btn[aria-selected="false"]:hover {
+      color: var(--foreground);
+      border-color: var(--accent);
+    }
+    .filter-pill[aria-pressed="true"] {
+      background: var(--primary);
+      color: var(--primary-foreground);
+      border-color: var(--primary);
+    }
+    .filter-pill[aria-pressed="false"] {
+      background: var(--content);
+      color: var(--muted-foreground);
+      border-color: var(--border);
+    }
+    .timeline-block {
+      cursor: pointer;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+    .timeline-block:hover {
+      opacity: 0.9;
+    }
+  </style>
+  <script>
+    (function initTheme() {
+      const saved = localStorage.getItem('tesishub-reports-theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('tesishub-reports-theme', isDark ? 'dark' : 'light');
+      const btn = document.getElementById('theme-toggle');
+      if (btn) btn.textContent = isDark ? '☀️ Modo claro' : '🌙 Modo oscuro';
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('theme-toggle');
+      if (btn) btn.textContent = document.documentElement.classList.contains('dark') ? '☀️ Modo claro' : '🌙 Modo oscuro';
+    });
+  </script>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased m-0 p-0">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <div class="flex flex-wrap items-center justify-between gap-2 text-xs pb-2">
+      <div class="flex items-center gap-2"><a href="./index.html" class="text-[var(--link)] hover:underline font-medium">← Volver al Panel Histórico (Sprints 2–8)</a><span class="text-[var(--muted-foreground)]">·</span><span class="font-semibold text-[var(--foreground)]">Detalle Sprint 8</span></div>
+      <button id="theme-toggle" type="button" onclick="toggleTheme()" class="px-2.5 py-1 rounded-md bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] hover:border-[var(--accent)] transition-colors cursor-pointer">🌙 Modo oscuro</button>
+    </div>
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-[var(--border)]">
+      <div class="space-y-1">
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <span class="px-2 py-0.5 rounded-full bg-[var(--card)] border border-[var(--border)] font-mono text-[var(--muted-foreground)]">Jira Sprint ID: 140</span>
+          <span class="px-2 py-0.5 rounded-full bg-[var(--card)] border border-[var(--success)] text-[var(--success)] font-medium">5 / 5 Finalizado</span>
+          <span class="text-[var(--muted-foreground)]">20 de noviembre de 2026 · 01:05 – 04:24 CST</span>
+        </div>
+        <h1 class="text-2xl font-bold tracking-tight">Reporte Interactivo — Sprint 8 · TesisHub</h1>
+        <p class="text-sm text-[var(--muted-foreground)]">
+          Visor MDX en papel (CU-04), comentarios anclados, navegación principal, limpieza de copia y suite E2E Dockerizada.
+        </p>
+      </div>
+      <nav class="flex flex-wrap gap-2" role="tablist" aria-label="Secciones del reporte">
+        <button class="tab-btn px-3.5 py-2 rounded-lg border text-xs font-medium transition-colors" role="tab" aria-selected="true" data-tab="resumen">Resumen y Calidad</button>
+        <button class="tab-btn px-3.5 py-2 rounded-lg border text-xs font-medium transition-colors" role="tab" aria-selected="false" data-tab="timeline">Timeline de Modelos</button>
+        <button class="tab-btn px-3.5 py-2 rounded-lg border text-xs font-medium transition-colors" role="tab" aria-selected="false" data-tab="orquestacion">Orquestación y Herramientas</button>
+      </nav>
+    </header>
+
+    <!-- KPI Strip -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" aria-label="Indicadores clave">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-2">
+        <div class="flex items-center justify-between text-xs text-[var(--muted-foreground)]">
+          <span>Velocidad del Sprint</span>
+          <span class="font-mono text-[var(--success)] font-semibold">100%</span>
+        </div>
+        <div class="text-2xl font-bold tabular-nums">26 / 26 <span class="text-sm font-normal text-[var(--muted-foreground)]">SP</span></div>
+        <div class="w-full h-2 rounded-full bg-[var(--content)] overflow-hidden">
+          <div class="h-full rounded-full" style="width: 100%; background: var(--success);"></div>
+        </div>
+        <p class="text-xs text-[var(--muted-foreground)]">5 historias fusionadas a <code class="text-[var(--code-foreground)]">develop</code> en 3 repos.</p>
+      </div>
+
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-2">
+        <div class="flex items-center justify-between text-xs text-[var(--muted-foreground)]">
+          <span>Pruebas Verificadas</span>
+          <span class="font-mono text-[var(--success)] font-semibold">0 fallos</span>
+        </div>
+        <div class="text-2xl font-bold tabular-nums">2,536 <span class="text-sm font-normal text-[var(--muted-foreground)]">tests</span></div>
+        <div class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+          Backend <strong class="text-[var(--foreground)]">1,507</strong> · Front Jest <strong class="text-[var(--foreground)]">822</strong> · MDX <strong class="text-[var(--foreground)]">93</strong> · E2E <strong class="text-[var(--foreground)]">114</strong>
+        </div>
+      </div>
+
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-2">
+        <div class="flex items-center justify-between text-xs text-[var(--muted-foreground)]">
+          <span>Filtro Maker–Checker</span>
+          <span class="font-mono text-[var(--warning)] font-semibold">10 bloqueantes</span>
+        </div>
+        <div class="text-2xl font-bold tabular-nums">100% <span class="text-sm font-normal text-[var(--muted-foreground)]">resueltos</span></div>
+        <div class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+          3 historias aprobadas en Ronda 1 · 2 en Ronda 2 (<strong class="text-[var(--foreground)]">0</strong> bloqueantes al merge).
+        </div>
+      </div>
+
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-2">
+        <div class="flex items-center justify-between text-xs text-[var(--muted-foreground)]">
+          <span>Duración y Failover</span>
+          <span class="font-mono text-[var(--accent)] font-semibold">4 niveles</span>
+        </div>
+        <div class="text-2xl font-bold tabular-nums">3h 19m</div>
+        <div class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+          Claude Code CLI → Swarm UI a la <strong class="text-[var(--foreground)]">01:42</strong> · Nivel 5 intacto (<strong class="text-[var(--foreground)]">34%</strong>).
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 1: RESUMEN Y CALIDAD -->
+    <main id="tab-resumen" class="space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Chart 1: Coverage vs 80% Gate -->
+        <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-4">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <h2 class="text-base font-semibold">Cobertura de Código vs. Umbral Mínimo (80%)</h2>
+              <p class="text-xs text-[var(--muted-foreground)]">Métricas reales verificadas por JaCoCo (Backend) e Istanbul/Jest (Frontend).</p>
+            </div>
+            <span class="text-xs px-2 py-0.5 rounded bg-[var(--content)] border border-[var(--border)] text-[var(--success)] font-mono">Gate ≥ 80%</span>
+          </div>
+          <div id="coverage-chart" class="w-full"></div>
+        </section>
+
+        <!-- Chart 2: Maker-Checker Findings -->
+        <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-4">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <h2 class="text-base font-semibold">Hallazgos Atrapados por el Checker (Antes del Merge)</h2>
+              <p class="text-xs text-[var(--muted-foreground)]">Distribución por severidad en Ronda 1; todas las historias cerraron con 0 bloqueantes.</p>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
+              <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm inline-block" style="background: var(--error);"></span>Bug 🔴</span>
+              <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm inline-block" style="background: var(--warning);"></span>Calidad 🟡</span>
+              <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm inline-block" style="background: var(--chart-2);"></span>NIT 🟢</span>
+            </div>
+          </div>
+          <div id="findings-chart" class="w-full"></div>
+          <p class="text-xs text-[var(--muted-foreground)]">
+            Haz clic en cualquier historia abajo para ver el detalle técnico y los bugs corregidos.
+          </p>
+        </section>
+      </div>
+
+      <!-- Bundle & CI Strip -->
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold">tesishub-backend</span>
+            <span class="font-mono text-[var(--success)]">Backend CI: pass</span>
+          </div>
+          <div class="text-xs text-[var(--muted-foreground)]">Commit <code class="text-[var(--code-foreground)]">c1b8ff7</code> · Surefire 627/627 · Failsafe 880/880</div>
+          <div class="text-xs text-[var(--muted-foreground)]">Spotless OK · Documento de diseño v0.41</div>
+        </div>
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold">tesishub-frontend</span>
+            <span class="font-mono text-[var(--success)]">Frontend CI: pass</span>
+          </div>
+          <div class="text-xs text-[var(--muted-foreground)]">Commit <code class="text-[var(--code-foreground)]">d3e4870</code> · Bundle inicial <strong class="text-[var(--foreground)]">625.60 kB</strong> (+4.89 kB en HUB-88)</div>
+          <div class="text-xs text-[var(--muted-foreground)]">KaTeX 0.18.11 diferido · 0 <code class="text-[var(--code-foreground)]">innerHTML</code> · 0 violaciones axe</div>
+        </div>
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-semibold">tesishub-infra</span>
+            <span class="font-mono text-[var(--success)]">Infra CI: pass</span>
+          </div>
+          <div class="text-xs text-[var(--muted-foreground)]">Commit <code class="text-[var(--code-foreground)]">1b84adc</code> · E2E Docker real: 8/8 (22.9 s)</div>
+          <div class="text-xs text-[var(--warning)]">E2E remoto pendiente de secreto <code>CROSS_REPO_TOKEN</code></div>
+        </div>
+      </section>
+
+      <!-- Stories Accordion -->
+      <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="text-base font-semibold">Entregables por Historia (5 / 5)</h2>
+            <p class="text-xs text-[var(--muted-foreground)]">Selecciona una tarjeta para expandir detalles de implementación, PRs y bugs atrapados.</p>
+          </div>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono">Total: 26 SP</span>
+        </div>
+        <div id="stories-list" class="space-y-2.5"></div>
+      </section>
+    </main>
+
+    <!-- TAB 2: TIMELINE DE MODELOS -->
+    <main id="tab-timeline" class="hidden space-y-6">
+      <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-base font-semibold">Cronograma Visual de Modelos por Rol (01:05 – 04:24 CST)</h2>
+            <p class="text-xs text-[var(--muted-foreground)]">Pasa el cursor o haz clic sobre cualquier bloque para inspeccionar el detalle del evento y el motivo de cambio de modelo.</p>
+          </div>
+          <div class="flex flex-wrap gap-1.5" role="group" aria-label="Filtrar por rol">
+            <button class="filter-pill px-2.5 py-1 rounded-md border text-xs font-medium" aria-pressed="true" data-role-filter="all">Todos</button>
+            <button class="filter-pill px-2.5 py-1 rounded-md border text-xs font-medium" aria-pressed="false" data-role-filter="Maker">Maker</button>
+            <button class="filter-pill px-2.5 py-1 rounded-md border text-xs font-medium" aria-pressed="false" data-role-filter="Checker">Checker</button>
+            <button class="filter-pill px-2.5 py-1 rounded-md border text-xs font-medium" aria-pressed="false" data-role-filter="Coordinador">Coordinador</button>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div id="model-legend" class="flex flex-wrap gap-3 text-xs text-[var(--muted-foreground)] pt-1"></div>
+
+        <!-- Swimlane SVG -->
+        <div class="overflow-x-auto pb-2">
+          <div id="timeline-svg-wrap" class="min-w-[780px]"></div>
+        </div>
+
+        <!-- Selected Event Inspector -->
+        <div id="timeline-detail" class="rounded-lg bg-[var(--content)] border border-[var(--border)] p-4 text-xs space-y-1">
+          <div class="font-semibold text-[var(--foreground)]">Selecciona un bloque en el cronograma para ver el detalle completo</div>
+          <div class="text-[var(--muted-foreground)]">Incluye rango horario exacto (CST), motor utilizado, modelo, rondas y evento de cuota si aplica.</div>
+        </div>
+      </section>
+
+      <!-- Time distribution & Escalation ladder -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-4">
+          <div>
+            <h2 class="text-base font-semibold">Tiempo Activo por Modelo (Maker + Checker)</h2>
+            <p class="text-xs text-[var(--muted-foreground)]">Minutos acumulados por cada modelo durante la ejecución (incluyendo trabajo paralelo en Oleada 1).</p>
+          </div>
+          <div id="model-time-chart" class="w-full"></div>
+        </section>
+
+        <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+          <div>
+            <h2 class="text-base font-semibold">Escalera de Prioridad y Estado de Cuotas</h2>
+            <p class="text-xs text-[var(--muted-foreground)]">Orden configurado de mejores modelos primero, con conmutación automática al agotarse cada nivel.</p>
+          </div>
+          <div id="ladder-list" class="space-y-2"></div>
+        </section>
+      </div>
+    </main>
+
+    <!-- TAB 3: ORQUESTACIÓN Y HERRAMIENTAS -->
+    <main id="tab-orquestacion" class="hidden space-y-6">
+      <!-- Architecture SVG Diagram -->
+      <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-4">
+        <div>
+          <h2 class="text-base font-semibold">Arquitectura de Orquestación y Transición a Swarm UI</h2>
+          <p class="text-xs text-[var(--muted-foreground)]">
+            Separación estricta entre Coordinador (planificación, Jira y merges), Maker (worktree principal) y Checker (worktree <code>-audit</code> aislado).
+          </p>
+        </div>
+        <div class="overflow-x-auto">
+          <svg viewBox="0 0 920 270" class="w-full min-w-[720px] h-auto" role="img" aria-label="Diagrama de orquestación Maker Checker y transición a Swarm UI">
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--muted-foreground)" />
+              </marker>
+            </defs>
+
+            <!-- Coordinator -->
+            <rect x="16" y="88" width="190" height="92" rx="10" fill="var(--content)" stroke="var(--primary)" stroke-width="2" />
+            <text x="111" y="114" text-anchor="middle" fill="var(--foreground)" font-size="13" font-weight="700">Coordinador</text>
+            <text x="111" y="133" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">Antigravity (Plan / Execute)</text>
+            <text x="111" y="150" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">Jira MCP · Merges · Cuotas</text>
+            <text x="111" y="168" text-anchor="middle" fill="var(--primary)" font-size="11" font-weight="600">No escribe ni audita código</text>
+
+            <!-- Tier 1: Claude Code CLI -->
+            <rect x="268" y="24" width="215" height="86" rx="10" fill="var(--content)" stroke="var(--chart-1)" stroke-width="2" />
+            <text x="375" y="48" text-anchor="middle" fill="var(--foreground)" font-size="12" font-weight="700">Fase 1: Claude Code CLI</text>
+            <text x="375" y="66" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">Nivel 1 · Opus 5.5 (xhigh)</text>
+            <text x="375" y="84" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">01:06 – 01:41 CST</text>
+            <text x="375" y="100" text-anchor="middle" fill="var(--chart-1)" font-size="11">HUB-101, HUB-94, HUB-88 Back</text>
+
+            <!-- Tier 2-5: Swarm UI -->
+            <rect x="268" y="152" width="215" height="96" rx="10" fill="var(--content)" stroke="var(--chart-3)" stroke-width="2" />
+            <text x="375" y="176" text-anchor="middle" fill="var(--foreground)" font-size="12" font-weight="700">Fase 2: Swarm UI</text>
+            <text x="375" y="194" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">Niveles 2–5 + monitor de stalls</text>
+            <text x="375" y="212" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">01:42 – 04:24 CST (failover vivo)</text>
+            <text x="375" y="232" text-anchor="middle" fill="var(--chart-3)" font-size="11">HUB-88 Front, HUB-100, HUB-63</text>
+
+            <!-- Maker Worktree -->
+            <rect x="540" y="28" width="175" height="80" rx="10" fill="var(--content)" stroke="var(--border)" stroke-width="1.5" />
+            <text x="627" y="54" text-anchor="middle" fill="var(--foreground)" font-size="12" font-weight="700">Worktree Maker</text>
+            <text x="627" y="72" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">tesishub-{back,front,infra}</text>
+            <text x="627" y="90" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">Código · Tests · PR</text>
+
+            <!-- Checker Worktree -->
+            <rect x="540" y="160" width="175" height="80" rx="10" fill="var(--content)" stroke="var(--border)" stroke-width="1.5" />
+            <text x="627" y="186" text-anchor="middle" fill="var(--foreground)" font-size="12" font-weight="700">Worktree Checker</text>
+            <text x="627" y="204" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">tesishub-*-audit (aislado)</text>
+            <text x="627" y="222" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">Reproducción · gh pr review</text>
+
+            <!-- GitHub & Jira -->
+            <rect x="764" y="58" width="140" height="62" rx="10" fill="var(--content)" stroke="var(--success)" stroke-width="1.5" />
+            <text x="834" y="84" text-anchor="middle" fill="var(--foreground)" font-size="12" font-weight="700">GitHub</text>
+            <text x="834" y="102" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">PRs · Reviews · CI</text>
+
+            <rect x="764" y="150" width="140" height="62" rx="10" fill="var(--content)" stroke="var(--accent)" stroke-width="1.5" />
+            <text x="834" y="176" text-anchor="middle" fill="var(--foreground)" font-size="12" font-weight="700">Jira (HUB)</text>
+            <text x="834" y="194" text-anchor="middle" fill="var(--muted-foreground)" font-size="11">Sprint 140 · Estados</text>
+
+            <!-- Arrows -->
+            <path d="M 206 116 L 264 74" fill="none" stroke="var(--muted-foreground)" stroke-width="1.5" marker-end="url(#arrow)" />
+            <path d="M 206 154 L 264 192" fill="none" stroke="var(--muted-foreground)" stroke-width="1.5" marker-end="url(#arrow)" />
+            <path d="M 483 56 L 536 56" fill="none" stroke="var(--muted-foreground)" stroke-width="1.5" marker-end="url(#arrow)" />
+            <path d="M 483 84 L 536 184" fill="none" stroke="var(--muted-foreground)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrow)" />
+            <path d="M 483 182 L 536 82" fill="none" stroke="var(--muted-foreground)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrow)" />
+            <path d="M 483 206 L 536 206" fill="none" stroke="var(--muted-foreground)" stroke-width="1.5" marker-end="url(#arrow)" />
+            <path d="M 715 68 L 760 82" fill="none" stroke="var(--muted-foreground)" stroke-width="1.5" marker-end="url(#arrow)" />
+            <path d="M 715 190 L 760 104" fill="none" stroke="var(--muted-foreground)" stroke-width="1.5" marker-end="url(#arrow)" />
+            <path d="M 715 204 L 760 186" fill="none" stroke="var(--muted-foreground)" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#arrow)" />
+          </svg>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          <div class="p-3 rounded-lg bg-[var(--content)] border border-[var(--border)] space-y-1">
+            <div class="font-semibold">¿Por qué se activó Swarm UI?</div>
+            <p class="text-[var(--muted-foreground)]">Los subagentes estándar no permiten fijar modelos específicos ni cambiar de modelo en vivo al agotarse la cuota. Swarm permitió failover sin perder contexto con <code>swarm{action:"model"}</code>.</p>
+          </div>
+          <div class="p-3 rounded-lg bg-[var(--content)] border border-[var(--border)] space-y-1">
+            <div class="font-semibold">Worktrees + Junctions NTFS</div>
+            <p class="text-[var(--muted-foreground)]"><code>workspace: "inherit"</code> apuntando a rutas absolutas en <code>C:\dev\projects\proyectoClaude</code> con cachés en <code>C:\DevTargets</code> evitó clonar repos y colisiones Maker/Checker.</p>
+          </div>
+          <div class="p-3 rounded-lg bg-[var(--content)] border border-[var(--border)] space-y-1">
+            <div class="font-semibold">Restricción MCP Atlassian</div>
+            <p class="text-[var(--muted-foreground)]">Los workers del Swarm no tienen acceso al MCP <code>atlassian</code>; los Checkers publicaron en GitHub y el Coordinador aplicó comentarios y transiciones en Jira.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tools Explorer -->
+      <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-base font-semibold">Herramientas Utilizadas por Capa</h2>
+            <p class="text-xs text-[var(--muted-foreground)]">Filtra por capa técnica para consultar el stack exacto usado en el Sprint 8.</p>
+          </div>
+          <div id="tool-filters" class="flex flex-wrap gap-1.5"></div>
+        </div>
+        <div id="tools-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+      </section>
+
+      <!-- Pending Manual Actions -->
+      <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+        <h2 class="text-base font-semibold">Acciones Manuales Pendientes de Cierre</h2>
+        <div class="space-y-2 text-xs">
+          <label class="flex items-start gap-3 p-3 rounded-lg bg-[var(--content)] border border-[var(--border)] cursor-pointer">
+            <input type="checkbox" class="mt-0.5 accent-[var(--primary)]" />
+            <span>
+              <strong class="text-[var(--foreground)]">Completar Sprint 8 en Jira (ID 140):</strong> las 5 historias (26/26 SP) ya están en <em>Finalizado</em>; el MCP de Atlassian no expone cierre formal de sprints, por lo que solo falta pulsar «Completar sprint» en el tablero.
+            </span>
+          </label>
+          <label class="flex items-start gap-3 p-3 rounded-lg bg-[var(--content)] border border-[var(--border)] cursor-pointer">
+            <input type="checkbox" class="mt-0.5 accent-[var(--primary)]" />
+            <span>
+              <strong class="text-[var(--foreground)]">Configurar secreto <code>CROSS_REPO_TOKEN</code> en GitHub Actions (<code>tesishub-infra</code>):</strong> necesario para que <code>.github/workflows/e2e-mock.yml</code> clone los repos privados <code>tesishub-backend</code> y <code>tesishub-frontend</code> (permiso <code>Contents: Read</code>).
+            </span>
+          </label>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // ---------- DATA ----------
+    const coverageData = [
+      { label: 'Backend · Líneas (JaCoCo)', value: 97.44, color: 'var(--chart-1)' },
+      { label: 'Backend · Ramas (JaCoCo)', value: 89.84, color: 'var(--chart-1)' },
+      { label: 'Frontend · Funciones (Jest)', value: 96.05, color: 'var(--chart-2)' },
+      { label: 'Frontend · Líneas (Jest)', value: 95.61, color: 'var(--chart-2)' },
+      { label: 'Frontend · Sentencias (Jest)', value: 95.08, color: 'var(--chart-2)' },
+      { label: 'Frontend · Ramas (Jest)', value: 81.53, color: 'var(--chart-3)' }
+    ];
+
+    const findingsData = [
+      { key: 'HUB-101', bugs: 0, quality: 0, nits: 1, rounds: 1 },
+      { key: 'HUB-94', bugs: 0, quality: 0, nits: 2, rounds: 1 },
+      { key: 'HUB-88 Back', bugs: 0, quality: 0, nits: 3, rounds: 1 },
+      { key: 'HUB-88 Front', bugs: 0, quality: 0, nits: 0, rounds: 1 },
+      { key: 'HUB-100', bugs: 6, quality: 0, nits: 2, rounds: 2 },
+      { key: 'HUB-63', bugs: 2, quality: 2, nits: 4, rounds: 2 }
+    ];
+
+    const stories = [
+      {
+        key: 'HUB-101', sp: 1, area: 'Frontend', rounds: 'Ronda 1/3',
+        title: 'Quitar mención del «MVP» al archivar una plantilla',
+        prs: 'Frontend PR #25 (9d4ca83)',
+        summary: 'Ajustado copy visible en template-archive-dialog.ts y añadida regla automática visible-copy.spec.ts que prohíbe menciones a «MVP» fuera de comentarios.',
+        catches: ['0 bloqueantes, 1 NIT menor (plural «MVPs»).']
+      },
+      {
+        key: 'HUB-94', sp: 1, area: 'Frontend', rounds: 'Ronda 1/3',
+        title: 'Navegación principal en el encabezado',
+        prs: 'Frontend PR #26 (edecbae)',
+        summary: 'Marca «TesisHub» enlazada a /dashboard y <nav> con Inicio, Espacios de trabajo (oculto a BLOCKED) y Administración, con aria-current="page" activo incluso en /change-requests/:id.',
+        catches: ['0 bloqueantes, 2 NITs menores (JSDoc y prueba Playwright extra en /admin).']
+      },
+      {
+        key: 'HUB-88', sp: 8, area: 'Backend + Frontend', rounds: 'Ronda 1/3 (ambos)',
+        title: 'Visor MDX en papel y vista de cambios (CU-04)',
+        prs: 'Backend PR #41 (c1b8ff7) · Frontend PR #27 (b19aa46)',
+        summary: 'Nuevo endpoint GET .../base/document (v0.41), renderizador HAST Angular puro sin innerHTML, Web Worker sin acorn, KaTeX 0.18.11 diferido, imágenes blob: con CSP en nginx.conf, modos Compacto/Detallado y WCAG 1.4.1. Etiqueta spike/HUB-68 verificada y PR #18 cerrado.',
+        catches: ['0 bloqueantes en Backend y Frontend (3 NITs en Backend).']
+      },
+      {
+        key: 'HUB-100', sp: 8, area: 'Frontend', rounds: 'Ronda 2/3',
+        title: 'Comentarios anclados sobre el documento (margen, selección y hover)',
+        prs: 'Frontend PR #28 (d3e4870)',
+        summary: '+ comentar en hover/focus/táctil, botón flotante Comentar al seleccionar texto con ancla Unicode en code points, hilos en margen (>=1400 px) o bajo párrafo (<=1024 px), colapsado individual/global y resolver/reabrir PUT.',
+        catches: [
+          'Ronda 1 atrapó 6 🔴 bugs confirmados con Jest: bloques JSX multilínea, quotedText vacío en autocerrados, startColumn desplazado en listas, notas [1] vs [^1], segunda ocurrencia repetida y pérdida de «Sobre texto eliminado» con bloque removed intermedio.',
+          'Todos corregidos con pruebas de regresión en commit d15453b → Ronda 2 aprobada con 0 bloqueantes y 0 NITs.'
+        ]
+      },
+      {
+        key: 'HUB-63', sp: 8, area: 'Infraestructura', rounds: 'Ronda 2/3',
+        title: 'Suite E2E Playwright (CU-01..CU-05) contra contenedores Docker mock',
+        prs: 'Infra PR #5 (1b84adc)',
+        summary: 'docker-compose.e2e.yml y 6 specs Playwright contra stack real (nginx + Angular + Spring Boot test-auth + Postgres + RabbitMQ + fake-entra) sin mocks de /api/v1/** ni cambios en producción, más workflow e2e-mock.yml.',
+        catches: [
+          'Ronda 1 atrapó 2 🔴 bugs (sintaxis yq v4 en infra-ci.yml y condición de carrera waitForTimeout(150) al resolver comentarios) + 2 🟡 calidad (BACKEND_DIR en corpus.ts / comando Windows en README y helper createWorkspace).',
+          'Corregidos junto con los 4 NITs en commit d00c0dd → Ronda 2 aprobada con 0 bloqueantes y 0 NITs (8/8 E2E en 22.9 s).'
+        ]
+      }
+    ];
+
+    const modelColors = {
+      'Orchestrator (Neon)': 'var(--chart-5)',
+      'Opus 5.5 (xhigh)': 'var(--chart-1)',
+      'Claude Sonnet 5.5 (High)': 'var(--error)',
+      'Gemini 4 Argon (High)': 'var(--chart-3)',
+      'Gemini 4 Neon (High)': 'var(--chart-2)',
+      'Gemini 4 Neon (XHigh)': 'var(--chart-4)',
+      'Gemini 4 Hydrogen (High)': 'var(--chart-6)'
+    };
+
+    // Minutes relative to 01:05 CST (total 199 min -> 04:24 CST)
+    const timelineEvents = [
+      { id: 1, start: 0, end: 1, time: '01:05 – 01:06', story: 'Pre-flight', role: 'Coordinador', engine: 'Antigravity', model: 'Orchestrator (Neon)', outcome: 'Sync develop en 3 repos, junctions NTFS, creación tesishub-infra-audit y transición HUB-88/HUB-101 a En curso.' },
+      { id: 2, start: 1, end: 5, time: '01:06 – 01:10', story: 'HUB-101', role: 'Maker', engine: 'Claude Code CLI', model: 'Opus 5.5 (xhigh)', outcome: 'Fix copy + visible-copy.spec.ts, abre PR #25 (b484a84).' },
+      { id: 3, start: 1, end: 28, time: '01:06 – 01:33', story: 'HUB-88 Back', role: 'Maker', engine: 'Claude Code CLI', model: 'Opus 5.5 (xhigh)', laneOffset: 1, outcome: 'En paralelo: endpoint base/document + diseño v0.41 + tests, abre PR #41 (486d859).' },
+      { id: 4, start: 6, end: 11, time: '01:11 – 01:16', story: 'HUB-101 R1', role: 'Checker', engine: 'Claude Code CLI', model: 'Opus 5.5 (xhigh)', outcome: 'APROBADA (0 bloq, 1 NIT) → merge 9d4ca83, Jira Finalizado.' },
+      { id: 5, start: 11, end: 24, time: '01:16 – 01:29', story: 'HUB-94', role: 'Maker', engine: 'Claude Code CLI', model: 'Opus 5.5 (xhigh)', outcome: 'Navegación principal + E2E, abre PR #26 (77a7ed4).' },
+      { id: 6, start: 24, end: 31, time: '01:29 – 01:36', story: 'HUB-94 R1', role: 'Checker', engine: 'Claude Code CLI', model: 'Opus 5.5 (xhigh)', outcome: 'APROBADA (0 bloq, 2 NITs) → merge edecbae, Jira Finalizado.' },
+      { id: 7, start: 28, end: 35, time: '01:33 – 01:40', story: 'HUB-88 Back R1', role: 'Checker', engine: 'Claude Code CLI', model: 'Opus 5.5 (xhigh)', laneOffset: 1, outcome: 'APROBADA (0 bloq, 3 NITs) → c1b8ff7 en backend/develop.' },
+      { id: 8, start: 36, end: 37, time: '01:41', story: 'HUB-88 Front (Límite)', role: 'Maker', engine: 'Claude Code CLI', model: 'Opus 5.5 (xhigh)', outcome: 'Límite semanal alcanzado (resets 3pm). Se desactiva Nivel 1 y se activa Swarm UI.' },
+      { id: 9, start: 37, end: 49, time: '01:42 – 01:54', story: 'HUB-88 Front (429)', role: 'Maker', engine: 'Swarm UI', model: 'Claude Sonnet 5.5 (High)', outcome: 'Creación Swarm Sprint 8 TesisHub + monitor. Fallo 429 RESOURCE_EXHAUSTED al iniciar.' },
+      { id: 10, start: 49, end: 81, time: '01:54 – 02:26', story: 'HUB-88 Front', role: 'Maker', engine: 'Swarm UI', model: 'Gemini 4 Argon (High)', outcome: 'Conmutado en vivo con swarm{action:"model"}. Abre PR #27 (ddebca4).' },
+      { id: 11, start: 81, end: 87, time: '02:26 – 02:32', story: 'HUB-88 Front R1', role: 'Checker', engine: 'Swarm UI', model: 'Gemini 4 Argon (High)', outcome: 'APROBADA (0 bloq, 0 NITs) → merge b19aa46, tag spike/HUB-68, PR #18 cerrado.' },
+      { id: 12, start: 90, end: 137, time: '02:35 – 03:22', story: 'HUB-100 R1', role: 'Maker', engine: 'Swarm UI', model: 'Gemini 4 Argon (High)', outcome: 'Comentarios anclados y margen, abre PR #28 (988e118; Argon queda en 4%).' },
+      { id: 13, start: 138, end: 144, time: '03:23 – 03:29', story: 'HUB-100 R1', role: 'Checker', engine: 'Swarm UI', model: 'Gemini 4 Neon (High)', outcome: 'Inicia en Argon (2%) y conmuta a Neon High; CAMBIOS SOLICITADOS (6 🔴 + 2 🟢).' },
+      { id: 14, start: 144, end: 154, time: '03:29 – 03:39', story: 'HUB-100 R2', role: 'Maker', engine: 'Swarm UI', model: 'Gemini 4 Neon (High)', outcome: 'Inicia en Argon (1%) y conmuta a Neon High; corrige 6 🔴 + 2 🟢, push d15453b.' },
+      { id: 15, start: 154, end: 156, time: '03:39 – 03:41', story: 'HUB-100 R2', role: 'Checker', engine: 'Swarm UI', model: 'Gemini 4 Neon (High)', outcome: 'APROBADA (0 bloq, 0 NITs) → merge d3e4870, Jira Finalizado.' },
+      { id: 16, start: 157, end: 171, time: '03:42 – 03:56', story: 'HUB-63 R1', role: 'Maker', engine: 'Swarm UI', model: 'Gemini 4 Hydrogen (High)', outcome: 'Inicia en Argon (1% → 0% el 2026-11-24); auto-conmuta a Hydrogen y abre PR #5 (c40aa73).' },
+      { id: 17, start: 171, end: 188, time: '03:56 – 04:13', story: 'HUB-63 R1', role: 'Checker', engine: 'Swarm UI', model: 'Gemini 4 Neon (XHigh)', outcome: 'CAMBIOS SOLICITADOS (2 🔴 + 2 🟡 + 4 🟢) tras corrida empírica en Docker real.' },
+      { id: 18, start: 188, end: 194, time: '04:13 – 04:19', story: 'HUB-63 R2', role: 'Maker', engine: 'Swarm UI', model: 'Gemini 4 Neon (XHigh)', outcome: 'Coordinador lo reasigna a Neon XHigh; corrige 4 bloq + 4 NITs, push d00c0dd.' },
+      { id: 19, start: 194, end: 197, time: '04:19 – 04:22', story: 'HUB-63 R2', role: 'Checker', engine: 'Swarm UI', model: 'Gemini 4 Neon (XHigh)', outcome: 'APROBADA (0 bloq, 0 NITs, 8/8 E2E) → merge 1b84adc, Jira Finalizado.' },
+      { id: 20, start: 198, end: 199, time: '04:23 – 04:24', story: 'Cierre', role: 'Coordinador', engine: 'Antigravity', model: 'Orchestrator (Neon)', outcome: 'Verificación Jira (5/5 Finalizado) + CI develop, [done] en board y reporte final.' }
+    ];
+
+    const ladderData = [
+      { level: 'Nivel 1', name: 'Claude Code CLI · Opus 5.5 (xhigh)', status: 'Agotado (01:41)', tone: 'var(--error)', note: 'Completó HUB-101, HUB-94 y HUB-88 Backend (Maker + Checker).' },
+      { level: 'Nivel 2', name: 'Swarm · Claude Sonnet 5.5 (High)', status: 'Agotado (429)', tone: 'var(--error)', note: 'Sin cuota disponible al crear maker-hub88.' },
+      { level: 'Nivel 3', name: 'Swarm · Gemini 4 Argon (High)', status: 'Agotado (0%)', tone: 'var(--warning)', note: 'Completó HUB-88 Frontend, HUB-100 R1 e inició HUB-63.' },
+      { level: 'Nivel 4', name: 'Swarm · Gemini 4 Neon (High / XHigh)', status: 'Activo (34% rest.)', tone: 'var(--success)', note: 'Cerró HUB-100 R2 y HUB-63 R1/R2 (Maker + Checker).' },
+      { level: 'Nivel 5', name: 'Swarm · Gemini 3.8 Flash (High)', status: 'Reserva intacta', tone: 'var(--accent)', note: 'No fue necesario activarlo (34% cuota compartida).' }
+    ];
+
+    const toolsData = [
+      { layer: 'Orquestación', title: 'Antigravity IDE (Plan/Execute)', desc: 'Coordinador en Orchestrator (Neon), revisiones periódicas de plan y gestión de estado.' },
+      { layer: 'Orquestación', title: 'Claude Code CLI v2.1.325', desc: 'Ejecución headless con --model opus --effort xhigh --dangerously-skip-permissions.' },
+      { layer: 'Orquestación', title: 'Antigravity Swarm UI', desc: 'Tablero compartido (swarm, post_message, read_board, swarm_wait), monitor de stalls y cambio de modelo en vivo.' },
+      { layer: 'Orquestación', title: 'Skill pr-audit/SKILL.md', desc: 'Protocolo Maker–Checker de máx. 3 rondas, corroboración empírica de bugs y publicación dual.' },
+      { layer: 'Gestión y CI', title: 'MCP Atlassian (Jira/Confluence)', desc: 'searchJiraIssuesUsingJql, getJiraIssue, transitionJiraIssue, addCommentToJiraIssue, getConfluencePage.' },
+      { layer: 'Gestión y CI', title: 'GitHub CLI (gh) & Actions', desc: 'PRs, reviews, checks, merges squash, Backend CI, Frontend CI, Infra CI y E2E Mock Suite.' },
+      { layer: 'Gestión y CI', title: 'Git Worktrees + Junctions NTFS', desc: 'Worktrees *-audit aislados con mklink /J hacia C:\\DevTargets para evitar bloqueos y copias.' },
+      { layer: 'Backend', title: 'Java 21 + Maven + Spotless', desc: 'Compilación y formato automatizado sin clean para preservar junctions.' },
+      { layer: 'Backend', title: 'JUnit 5 + Testcontainers + ArchUnit', desc: '627 Surefire + 880 Failsafe, arquitectura hexagonal y migraciones reales.' },
+      { layer: 'Backend', title: 'Pact + WireMock + REST Assured + JaCoCo', desc: 'Validación OpenAPI, stubs Módulo 2, fake-entra y cobertura 97.44% líneas.' },
+      { layer: 'Frontend', title: 'Angular 20 + TypeScript + ESLint/Prettier', desc: 'Build productivo controlado (+4.89 kB inicial) y cero errores de tipado/lint.' },
+      { layer: 'Frontend', title: 'Jest + Playwright + axe-core', desc: '822 tests Jest, 106 E2E Playwright (Chromium) y 0 violaciones de accesibilidad.' },
+      { layer: 'Frontend', title: 'Stack MDX sin acorn + KaTeX 0.18.11', desc: 'unified, remark-gfm/math, remark-mdx-jsx, rehype-sanitize, diff, Web Worker y validador MDX (93/93).' },
+      { layer: 'Infra y E2E', title: 'Docker Compose + Nginx + Postgres/RabbitMQ', desc: 'docker-compose.e2e.yml con 5 servicios healthy, CSP real y limpieza down -v.' },
+      { layer: 'Infra y E2E', title: 'Playwright Multi-contexto + FakeEntraBridge', desc: '8 specs E2E sin mocks de /api/v1/**, red aislada y verificación XSS/CSP.' },
+      { layer: 'Infra y E2E', title: 'mikefarah/yq:4 + Python yaml.safe_load', desc: 'Validación estricta de workflows GitHub Actions y archivos Compose.' }
+    ];
+
+    // ---------- RENDER COVERAGE CHART ----------
+    function renderCoverageChart() {
+      const container = document.getElementById('coverage-chart');
+      const rowH = 38;
+      const padL = 195, padR = 52, padT = 16, padB = 26;
+      const w = 520, h = padT + coverageData.length * rowH + padB;
+      const chartW = w - padL - padR;
+      const xOf = (v) => padL + (v / 100) * chartW;
+
+      let svg = `<svg viewBox="0 0 ${w} ${h}" class="w-full h-auto" role="img" aria-label="Gráfica de cobertura de código vs umbral 80%">`;
+      // Grid ticks
+      [0, 50, 80, 100].forEach(t => {
+        const x = xOf(t);
+        const isGate = t === 80;
+        svg += `<line x1="${x}" y1="${padT - 4}" x2="${x}" y2="${h - padB}" stroke="${isGate ? 'var(--warning)' : 'var(--border)'}" stroke-width="${isGate ? 1.5 : 1}" ${isGate ? 'stroke-dasharray="4 3"' : ''} />`;
+        svg += `<text x="${x}" y="${h - 8}" text-anchor="middle" fill="${isGate ? 'var(--warning)' : 'var(--muted-foreground)'}" font-size="11" font-weight="${isGate ? '700' : '400'}">${t}%</text>`;
+      });
+
+      coverageData.forEach((d, i) => {
+        const y = padT + i * rowH + 8;
+        const barW = (d.value / 100) * chartW;
+        svg += `<text x="${padL - 10}" y="${y + 13}" text-anchor="end" fill="var(--foreground)" font-size="11.5">${d.label}</text>`;
+        svg += `<rect x="${padL}" y="${y}" width="${chartW}" height="18" rx="4" fill="var(--content)" />`;
+        svg += `<rect x="${padL}" y="${y}" width="${barW}" height="18" rx="4" fill="${d.color}" />`;
+        svg += `<text x="${padL + barW + 6}" y="${y + 13}" fill="var(--foreground)" font-size="11.5" font-weight="600" font-family="monospace">${d.value.toFixed(2)}%</text>`;
+      });
+      svg += `</svg>`;
+      container.innerHTML = svg;
+    }
+
+    // ---------- RENDER FINDINGS CHART ----------
+    function renderFindingsChart() {
+      const container = document.getElementById('findings-chart');
+      const rowH = 38;
+      const padL = 105, padR = 72, padT = 12, padB = 20;
+      const w = 520, h = padT + findingsData.length * rowH + padB;
+      const chartW = w - padL - padR;
+      const maxVal = 9;
+
+      let svg = `<svg viewBox="0 0 ${w} ${h}" class="w-full h-auto" role="img" aria-label="Hallazgos del Checker por historia">`;
+      findingsData.forEach((d, i) => {
+        const y = padT + i * rowH + 8;
+        const total = d.bugs + d.quality + d.nits;
+        let cx = padL;
+        svg += `<text x="${padL - 10}" y="${y + 13}" text-anchor="end" fill="var(--foreground)" font-size="11.5" font-weight="500">${d.key}</text>`;
+        svg += `<rect x="${padL}" y="${y}" width="${chartW}" height="18" rx="4" fill="var(--content)" />`;
+
+        const segs = [
+          { n: d.bugs, c: 'var(--error)' },
+          { n: d.quality, c: 'var(--warning)' },
+          { n: d.nits, c: 'var(--chart-2)' }
+        ];
+        segs.forEach(s => {
+          if (s.n > 0) {
+            const sw = (s.n / maxVal) * chartW;
+            svg += `<rect x="${cx}" y="${y}" width="${sw}" height="18" rx="3" fill="${s.c}" />`;
+            if (sw >= 18) {
+              svg += `<text x="${cx + sw / 2}" y="${y + 13}" text-anchor="middle" fill="var(--primary-foreground)" font-size="11" font-weight="700">${s.n}</text>`;
+            }
+            cx += sw + 1;
+          }
+        });
+
+        const tag = total === 0 ? '0 (Limpio)' : `R${d.rounds} → 0 bloq`;
+        svg += `<text x="${padL + chartW + 8}" y="${y + 13}" fill="var(--muted-foreground)" font-size="11" font-family="monospace">${tag}</text>`;
+      });
+      svg += `</svg>`;
+      container.innerHTML = svg;
+    }
+
+    // ---------- RENDER STORIES ----------
+    function renderStories() {
+      const wrap = document.getElementById('stories-list');
+      wrap.innerHTML = stories.map((s, idx) => `
+        <div class="rounded-lg border border-[var(--border)] bg-[var(--content)] overflow-hidden">
+          <button type="button" class="w-full text-left px-4 py-3 flex flex-wrap items-center justify-between gap-2 hover:bg-[var(--card)] transition-colors" onclick="toggleStory(${idx})" aria-expanded="false" id="story-btn-${idx}">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="font-mono text-xs font-bold px-2 py-0.5 rounded bg-[var(--card)] border border-[var(--border)]">${s.key}</span>
+              <span class="text-sm font-semibold">${s.title}</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="px-2 py-0.5 rounded bg-[var(--card)] border border-[var(--border)] text-[var(--muted-foreground)]">${s.area}</span>
+              <span class="font-mono text-[var(--muted-foreground)]">${s.sp} SP</span>
+              <span class="px-2 py-0.5 rounded bg-[var(--card)] border border-[var(--success)] text-[var(--success)]">${s.rounds}</span>
+              <span class="text-[var(--muted-foreground)]" id="story-arrow-${idx}">▾</span>
+            </div>
+          </button>
+          <div id="story-panel-${idx}" class="hidden px-4 pb-3.5 pt-2 border-t border-[var(--border)] text-xs space-y-2">
+            <div class="text-[var(--muted-foreground)] font-mono">${s.prs}</div>
+            <p class="text-[var(--foreground)] leading-relaxed">${s.summary}</p>
+            <div class="space-y-1">
+              <div class="font-semibold text-[var(--muted-foreground)]">Auditoría Maker–Checker:</div>
+              <ul class="list-disc pl-5 space-y-1 text-[var(--muted-foreground)]">
+                ${s.catches.map(c => `<li>${c}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    window.toggleStory = (idx) => {
+      const p = document.getElementById(`story-panel-${idx}`);
+      const b = document.getElementById(`story-btn-${idx}`);
+      const a = document.getElementById(`story-arrow-${idx}`);
+      const open = p.classList.toggle('hidden') === false;
+      b.setAttribute('aria-expanded', String(open));
+      a.textContent = open ? '▴' : '▾';
+    };
+
+    // ---------- RENDER TIMELINE ----------
+    let activeRoleFilter = 'all';
+    function renderLegend() {
+      document.getElementById('model-legend').innerHTML = Object.entries(modelColors).map(([name, c]) => `
+        <span class="inline-flex items-center gap-1.5">
+          <span class="w-3 h-3 rounded-sm inline-block" style="background: ${c};"></span>
+          <span>${name}</span>
+        </span>
+      `).join('');
+    }
+
+    function selectTimelineEvent(ev) {
+      const box = document.getElementById('timeline-detail');
+      const color = modelColors[ev.model] || 'var(--primary)';
+      box.innerHTML = `
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full inline-block" style="background:${color};"></span>
+          <span class="font-semibold text-sm text-[var(--foreground)]">${ev.story}</span>
+          <span class="px-2 py-0.5 rounded bg-[var(--card)] border border-[var(--border)] font-mono">${ev.time} CST</span>
+          <span class="px-2 py-0.5 rounded bg-[var(--card)] border border-[var(--border)]">${ev.role}</span>
+          <span class="px-2 py-0.5 rounded bg-[var(--card)] border border-[var(--border)]">${ev.engine} · <strong>${ev.model}</strong></span>
+        </div>
+        <p class="text-[var(--muted-foreground)] leading-relaxed pt-1">${ev.outcome}</p>
+      `;
+    }
+
+    function renderTimeline() {
+      const wrap = document.getElementById('timeline-svg-wrap');
+      const roles = ['Coordinador', 'Maker', 'Checker'];
+      const padL = 104, padR = 24, padT = 36, padB = 34;
+      const laneH = 68;
+      const w = 920, h = padT + roles.length * laneH + padB;
+      const chartW = w - padL - padR;
+      const totalMin = 200; // 01:05 -> 04:25
+      const xOf = (m) => padL + (m / totalMin) * chartW;
+
+      let svg = `<svg viewBox="0 0 ${w} ${h}" class="w-full h-auto" role="img" aria-label="Timeline de modelos por rol">`;
+
+      // Hour ticks: 01:05 (0), 01:30 (25), 02:00 (55), 02:30 (85), 03:00 (115), 03:30 (145), 04:00 (175), 04:25 (200)
+      const ticks = [
+        { m: 0, lbl: '01:05' }, { m: 25, lbl: '01:30' }, { m: 55, lbl: '02:00' },
+        { m: 85, lbl: '02:30' }, { m: 115, lbl: '03:00' }, { m: 145, lbl: '03:30' },
+        { m: 175, lbl: '04:00' }, { m: 200, lbl: '04:25' }
+      ];
+      ticks.forEach(t => {
+        const x = xOf(t.m);
+        svg += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${h - padB}" stroke="var(--border)" stroke-width="1" />`;
+        svg += `<text x="${x}" y="${h - 12}" text-anchor="middle" fill="var(--muted-foreground)" font-size="11" font-family="monospace">${t.lbl}</text>`;
+      });
+
+      // Swarm UI Transition marker at 01:42 (m = 37)
+      const xSwarm = xOf(37);
+      svg += `<rect x="${xSwarm}" y="${padT}" width="${w - padR - xSwarm}" height="${roles.length * laneH}" fill="var(--content)" opacity="0.45" />`;
+      svg += `<line x1="${xSwarm}" y1="${padT - 14}" x2="${xSwarm}" y2="${h - padB}" stroke="var(--warning)" stroke-width="2" stroke-dasharray="5 3" />`;
+      svg += `<text x="${xSwarm + 6}" y="${padT - 10}" fill="var(--warning)" font-size="11" font-weight="700">01:42 · Transición a Swarm UI (límite Claude Code)</text>`;
+
+      // Lanes
+      roles.forEach((r, idx) => {
+        const y = padT + idx * laneH;
+        svg += `<line x1="${padL}" y1="${y + laneH}" x2="${w - padR}" y2="${y + laneH}" stroke="var(--border)" stroke-width="1" />`;
+        svg += `<text x="${padL - 12}" y="${y + laneH / 2 + 4}" text-anchor="end" fill="var(--foreground)" font-size="12" font-weight="600">${r}</text>`;
+      });
+
+      // Event bars
+      timelineEvents.forEach(ev => {
+        if (activeRoleFilter !== 'all' && ev.role !== activeRoleFilter) return;
+        const laneIdx = roles.indexOf(ev.role);
+        const laneY = padT + laneIdx * laneH;
+        const barH = 22;
+        const y = ev.laneOffset ? laneY + 38 : laneY + 12;
+        const x = xOf(ev.start);
+        const bw = Math.max(8, xOf(ev.end) - x);
+        const fill = modelColors[ev.model] || 'var(--primary)';
+        svg += `<g class="timeline-block" data-ev-id="${ev.id}">`;
+        svg += `<rect x="${x}" y="${y}" width="${bw}" height="${barH}" rx="4" fill="${fill}" stroke="var(--background)" stroke-width="1" />`;
+        if (bw >= 54) {
+          svg += `<text x="${x + bw / 2}" y="${y + 15}" text-anchor="middle" fill="var(--primary-foreground)" font-size="10.5" font-weight="600">${ev.story}</text>`;
+        }
+        svg += `</g>`;
+      });
+
+      svg += `</svg>`;
+      wrap.innerHTML = svg;
+
+      wrap.querySelectorAll('.timeline-block').forEach(el => {
+        const ev = timelineEvents.find(e => e.id === Number(el.dataset.evId));
+        el.addEventListener('click', () => selectTimelineEvent(ev));
+        el.addEventListener('mouseenter', () => selectTimelineEvent(ev));
+      });
+    }
+
+    function renderModelTimeChart() {
+      const totals = {};
+      timelineEvents.filter(e => e.role !== 'Coordinador').forEach(e => {
+        totals[e.model] = (totals[e.model] || 0) + Math.max(1, e.end - e.start);
+      });
+      const rows = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+      const maxMin = Math.max(...rows.map(r => r[1]));
+      const container = document.getElementById('model-time-chart');
+      container.innerHTML = rows.map(([m, mins]) => {
+        const pct = Math.round((mins / maxMin) * 100);
+        return `
+          <div class="space-y-1 mb-3 text-xs">
+            <div class="flex justify-between">
+              <span class="font-medium">${m}</span>
+              <span class="font-mono text-[var(--muted-foreground)]">${mins} min</span>
+            </div>
+            <div class="w-full h-2.5 rounded-full bg-[var(--content)] overflow-hidden">
+              <div class="h-full rounded-full" style="width:${pct}%; background:${modelColors[m]};"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderLadder() {
+      document.getElementById('ladder-list').innerHTML = ladderData.map(item => `
+        <div class="p-3 rounded-lg bg-[var(--content)] border border-[var(--border)] text-xs space-y-1">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="font-semibold"><span class="font-mono text-[var(--muted-foreground)] mr-1.5">${item.level}</span>${item.name}</span>
+            <span class="font-mono font-semibold" style="color:${item.tone};">${item.status}</span>
+          </div>
+          <p class="text-[var(--muted-foreground)]">${item.note}</p>
+        </div>
+      `).join('');
+    }
+
+    // ---------- RENDER TOOLS ----------
+    let activeToolLayer = 'Todas';
+    function renderTools() {
+      const layers = ['Todas', ...new Set(toolsData.map(t => t.layer))];
+      document.getElementById('tool-filters').innerHTML = layers.map(l => `
+        <button class="filter-pill px-2.5 py-1 rounded-md border text-xs font-medium" aria-pressed="${l === activeToolLayer}" data-layer="${l}">${l}</button>
+      `).join('');
+
+      document.querySelectorAll('#tool-filters button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activeToolLayer = btn.dataset.layer;
+          renderTools();
+        });
+      });
+
+      const list = activeToolLayer === 'Todas' ? toolsData : toolsData.filter(t => t.layer === activeToolLayer);
+      document.getElementById('tools-grid').innerHTML = list.map(t => `
+        <div class="p-3.5 rounded-lg bg-[var(--content)] border border-[var(--border)] space-y-1.5 text-xs">
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-semibold text-[var(--foreground)]">${t.title}</span>
+            <span class="px-1.5 py-0.5 rounded bg-[var(--card)] border border-[var(--border)] text-[var(--muted-foreground)]">${t.layer}</span>
+          </div>
+          <p class="text-[var(--muted-foreground)] leading-relaxed">${t.desc}</p>
+        </div>
+      `).join('');
+    }
+
+    // ---------- TABS & ROLE FILTERS ----------
+    document.querySelectorAll('[role="tab"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.tab;
+        document.querySelectorAll('[role="tab"]').forEach(b => b.setAttribute('aria-selected', String(b === btn)));
+        ['resumen', 'timeline', 'orquestacion'].forEach(id => {
+          document.getElementById(`tab-${id}`).classList.toggle('hidden', id !== target);
+        });
+      });
+    });
+
+    document.querySelectorAll('[data-role-filter]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeRoleFilter = btn.dataset.roleFilter;
+        document.querySelectorAll('[data-role-filter]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+        renderTimeline();
+      });
+    });
+
+    // ---------- INIT ----------
+    renderCoverageChart();
+    renderFindingsChart();
+    renderStories();
+    renderLegend();
+    renderTimeline();
+    renderModelTimeChart();
+    renderLadder();
+    renderTools();
+  </script>
+</body>
+</html>
