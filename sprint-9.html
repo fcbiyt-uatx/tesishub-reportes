@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reporte Sprint 9 — TesisHub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --background: #f6f8fa;
+      --content: #f0f3f6;
+      --card: #ffffff;
+      --border: #d0d7de;
+      --foreground: #1f2328;
+      --muted-foreground: #656d76;
+      --code-foreground: #0550ae;
+      --primary: #1f883d;
+      --primary-foreground: #ffffff;
+      --accent: #0969da;
+      --link: #0969da;
+      --success: #1a7f37;
+      --warning: #9a6700;
+      --error: #cf222e;
+      --chart-1: #0969da;
+      --chart-2: #1f883d;
+      --chart-3: #8250df;
+      --chart-4: #bf3989;
+      --chart-5: #0e7490;
+    }
+    html.dark {
+      --background: #0d1117;
+      --content: #161b22;
+      --card: #161b22;
+      --border: #30363d;
+      --foreground: #e6edf3;
+      --muted-foreground: #8b949e;
+      --code-foreground: #79c0ff;
+      --primary: #238636;
+      --primary-foreground: #ffffff;
+      --accent: #58a6ff;
+      --link: #58a6ff;
+      --success: #3fb950;
+      --warning: #d29922;
+      --error: #f85149;
+      --chart-1: #58a6ff;
+      --chart-2: #3fb950;
+      --chart-3: #a371f7;
+      --chart-4: #f778ba;
+      --chart-5: #39c5cf;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Roboto, sans-serif; }
+    .filter-pill[aria-pressed="true"] { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+    .filter-pill[aria-pressed="false"] { background: var(--content); color: var(--muted-foreground); border-color: var(--border); }
+  </style>
+  <script>
+    (function initTheme() {
+      const saved = localStorage.getItem('tesishub-reports-theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && prefersDark)) document.documentElement.classList.add('dark');
+    })();
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('tesishub-reports-theme', isDark ? 'dark' : 'light');
+      const btn = document.getElementById('theme-toggle');
+      if (btn) btn.textContent = isDark ? '☀️ Modo claro' : '🌙 Modo oscuro';
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('theme-toggle');
+      if (btn) btn.textContent = document.documentElement.classList.contains('dark') ? '☀️ Modo claro' : '🌙 Modo oscuro';
+    });
+  </script>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased m-0 p-0">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <div class="flex flex-wrap items-center justify-between gap-2 text-xs pb-2">
+      <div class="flex items-center gap-2">
+        <a href="./index.html" class="text-[var(--link)] hover:underline font-medium">← Volver al Panel Histórico (Sprints 2–9)</a>
+        <span class="text-[var(--muted-foreground)]">·</span>
+        <span class="font-semibold text-[var(--foreground)]">Detalle Sprint 9</span>
+      </div>
+      <button id="theme-toggle" type="button" onclick="toggleTheme()" class="px-2.5 py-1 rounded-md bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] hover:border-[var(--accent)] transition-colors cursor-pointer">🌙 Modo oscuro</button>
+    </div>
+
+    <header class="space-y-2 pb-4 border-b border-[var(--border)]">
+      <div class="flex flex-wrap items-center gap-2 text-xs">
+        <span class="px-2 py-0.5 rounded-full bg-[var(--card)] border border-[var(--border)] font-mono text-[var(--muted-foreground)]">Jira Sprint ID 141</span>
+        <span class="px-2 py-0.5 rounded-full bg-[var(--card)] border border-[var(--success)] text-[var(--success)] font-medium">22 / 22 Historias · 83 / 83 SP</span>
+        <span class="text-[var(--muted-foreground)]">22 – 24 nov 2026</span>
+      </div>
+      <h1 class="text-2xl font-bold tracking-tight">Reporte Sprint 9 — Look &amp; Feel, Angular 22 y Cierre de Accesibilidad</h1>
+      <p class="text-sm text-[var(--muted-foreground)]">
+        Renovación visual completa en 9 temas, actualización Angular 20 → 22 + TypeScript 6.0, endpoints de actividad/invitaciones, 0 violaciones WCAG 2.1 AA en 9 temas × 8 pantallas y crítica de diseño de 36.5 / 40.
+      </p>
+    </header>
+
+    <!-- KPIs -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1">
+        <div class="text-xs text-[var(--muted-foreground)]">Historias / Story Points</div>
+        <div class="text-2xl font-bold tabular-nums">22 / 22 <span class="text-sm font-normal text-[var(--success)]">83 SP</span></div>
+        <p class="text-xs text-[var(--muted-foreground)]">3 PRs Backend + 19 PRs Frontend fusionados en <code>develop</code>.</p>
+      </div>
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1">
+        <div class="text-xs text-[var(--muted-foreground)]">Suite de Pruebas al Cierre</div>
+        <div class="text-2xl font-bold tabular-nums">3,524 <span class="text-xs font-mono text-[var(--success)]">+988</span></div>
+        <p class="text-xs text-[var(--muted-foreground)]">1,573 Back · 1,599 Jest · 251 E2E · 93 MDX · 8 Infra.</p>
+      </div>
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1">
+        <div class="text-xs text-[var(--muted-foreground)]">Crítica de Diseño (HUB-121)</div>
+        <div class="text-2xl font-bold tabular-nums">36.5 / 40 <span class="text-xs font-mono text-[var(--success)]">+14.5</span></div>
+        <p class="text-xs text-[var(--muted-foreground)]">De 22.0/40 inicial a 36–37/40 en los 4 grupos (meta ≥ 30).</p>
+      </div>
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1">
+        <div class="text-xs text-[var(--muted-foreground)]">Bloqueantes Pre-Merge</div>
+        <div class="text-2xl font-bold tabular-nums">10 <span class="text-sm font-normal text-[var(--muted-foreground)]">atrapados</span></div>
+        <p class="text-xs text-[var(--muted-foreground)]">3 🔴 empíricos + 5 🟠 + 2 🟡 corregidos antes del merge.</p>
+      </div>
+    </section>
+
+    <!-- Charts: Design Critique + Coverage -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+        <div>
+          <h2 class="text-base font-semibold">Evolución de la Crítica de Diseño (Inicial vs. Sprint 9)</h2>
+          <p class="text-xs text-[var(--muted-foreground)]">Evaluación heurística sobre 40 puntos por grupo de pantallas (meta ≥ 30/40).</p>
+        </div>
+        <div id="critique-chart"></div>
+      </section>
+
+      <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+        <div>
+          <h2 class="text-base font-semibold">Cobertura Final de Pruebas (Gate ≥ 80%)</h2>
+          <p class="text-xs text-[var(--muted-foreground)]">JaCoCo en <code>tesishub-backend</code> (<code>88ba4ac</code>) y Jest en <code>tesishub-frontend</code> (<code>d501bfd</code>).</p>
+        </div>
+        <div id="coverage-chart"></div>
+      </section>
+    </div>
+
+    <!-- Empirical catches -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+      <h2 class="text-base font-semibold">Hallazgos Empíricos Interceptados antes del Merge (Maker–Checker)</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+        <div class="p-3.5 rounded-lg bg-[var(--content)] border border-[var(--border)] space-y-1">
+          <div class="font-semibold text-[var(--error)]">🔴 HUB-124 · Caché L1 JPA obsoleta tras lockEmail</div>
+          <p class="text-[var(--muted-foreground)]">Confirmado con <code>InvitationConcurrencyIT</code>: reenviar/revocar devolvía 500 o falso 204 ante consumo concurrente. Corregido con <code>entityManager.clear()</code>.</p>
+        </div>
+        <div class="p-3.5 rounded-lg bg-[var(--content)] border border-[var(--border)] space-y-1">
+          <div class="font-semibold text-[var(--error)]">🔴 HUB-111 · Solapamiento de barra superior (641–910 px) + Bundle</div>
+          <p class="text-[var(--muted-foreground)]">Enlaces tapaban acciones en tableta y bundle subió a 785.60 kB. Corregido con puntos de quiebre a iconos, <code>@defer</code> (746.15 kB ≤ 750 kB) y 4 pruebas de guardas.</p>
+        </div>
+        <div class="p-3.5 rounded-lg bg-[var(--content)] border border-[var(--border)] space-y-1">
+          <div class="font-semibold text-[var(--error)]">🔴 HUB-119 · Avisos persistentes entre Usuarios e Invitaciones</div>
+          <p class="text-[var(--muted-foreground)]"><code>UserList</code> e <code>InvitationList</code> usaban instancias separadas de <code>screenNotices()</code>. Corregido compartiendo <code>SCREEN_NOTICES</code> + 6 pruebas de regresión.</p>
+        </div>
+        <div class="p-3.5 rounded-lg bg-[var(--content)] border border-[var(--border)] space-y-1">
+          <div class="font-semibold text-[var(--warning)]">🟠 HUB-102, HUB-105 y HUB-121 · Typecheck, a11y y contraste Darcula</div>
+          <p class="text-[var(--muted-foreground)]">TS2322 en specs (HUB-102), <code>interactive-supports-focus</code> en <code>radiogroup</code> (HUB-105) y contraste 4.15:1 en marcas Darcula sobre <code>&lt;ins&gt;/&lt;del&gt;</code> → <code>#fde047</code> (4.86:1).</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filterable Stories Table -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base font-semibold">Entregables del Sprint 9 (22 Historias · 83 SP)</h2>
+          <p class="text-xs text-[var(--muted-foreground)]">Filtra por repositorio o área técnica.</p>
+        </div>
+        <div class="flex flex-wrap gap-1.5 text-xs" id="story-filters">
+          <button type="button" class="filter-pill px-2.5 py-1 rounded-md border cursor-pointer" aria-pressed="true" data-filter="all">Todas (22)</button>
+          <button type="button" class="filter-pill px-2.5 py-1 rounded-md border cursor-pointer" aria-pressed="false" data-filter="Backend">Backend (3)</button>
+          <button type="button" class="filter-pill px-2.5 py-1 rounded-md border cursor-pointer" aria-pressed="false" data-filter="Frontend">Frontend (19)</button>
+        </div>
+      </div>
+      <div id="stories-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+    </section>
+  </div>
+
+  <script>
+    const stories = [
+      { key: 'HUB-122', area: 'Backend', sp: 2, pr: 'Back #42 (71e53e8)', rounds: '1 ronda', desc: 'openCommentCount en ChangeRequestDetail y eventos SSE.' },
+      { key: 'HUB-123', area: 'Backend', sp: 5, pr: 'Back #43 (03c9624)', rounds: '1 ronda', desc: 'latestOpenChangeRequest, lastActivityAt y GET /users/me/pending (O(1) SQL).' },
+      { key: 'HUB-124', area: 'Backend', sp: 3, pr: 'Back #44 (88ba4ac)', rounds: '2 rondas', desc: 'V16 invitaciones: listar, reenviar, revocar y fix caché L1 JPA.' },
+      { key: 'HUB-102', area: 'Frontend', sp: 2, pr: 'Front #30 (a5c8fd4)', rounds: '2 rondas', desc: 'Interceptores funcionales, retiro de guard de clase y visor con @defer (-243.65 kB).' },
+      { key: 'HUB-103', area: 'Frontend', sp: 5, pr: 'Front #31 (90c47dc)', rounds: '1 ronda', desc: 'Migración Angular 20 → 22.3.0, TypeScript 6.0.3 y Docker node:24-alpine.' },
+      { key: 'HUB-105', area: 'Frontend', sp: 8, pr: 'Front #32 (588cfe3)', rounds: '2 rondas', desc: 'Tokens semánticos, 9 temas, pre-paint CSP y diálogo «Apariencia».' },
+      { key: 'HUB-106', area: 'Frontend', sp: 3, pr: 'Front #33 (6d6e16d)', rounds: '1 ronda', desc: 'Manrope/Geist Mono WOFF2 autoalojados e iconos lucide-angular tree-shaken.' },
+      { key: 'HUB-113', area: 'Frontend', sp: 2, pr: 'Front #34 (7a66df9)', rounds: '1 ronda', desc: 'Sincronización OpenAPI/diseño y mocks tipados de actividad y pendientes.' },
+      { key: 'HUB-118', area: 'Frontend', sp: 1, pr: 'Front #35 (bf84a0b)', rounds: '1 ronda', desc: 'Contrato, catálogo de errores y mocks para invitaciones pendientes.' },
+      { key: 'HUB-108', area: 'Frontend', sp: 5, pr: 'Front #36 (ef8d047)', rounds: '1 ronda', desc: 'Componentes base: segmentado, vacío, esqueleto, botón icono, avatar y chips.' },
+      { key: 'HUB-107', area: 'Frontend', sp: 3, pr: 'Front #37 (119c723)', rounds: '1 ronda', desc: 'Tokens de movimiento, withViewTransitions(), @starting-style y reducedMotion.' },
+      { key: 'HUB-110', area: 'Frontend', sp: 3, pr: 'Front #38 (b29f586)', rounds: '1 ronda', desc: 'Componente th-journey-track (variantes full y compact accesibles).' },
+      { key: 'HUB-112', area: 'Frontend', sp: 2, pr: 'Front #39 (4fad44c)', rounds: '1 ronda', desc: 'Fix: Fusionar deshabilitado desde carga inicial usando openCommentCount.' },
+      { key: 'HUB-120', area: 'Frontend', sp: 2, pr: 'Front #40 (9cdea98)', rounds: '1 ronda', desc: 'Textos en español académico sin jerga técnica ni restos de wireframe.' },
+      { key: 'HUB-109', area: 'Frontend', sp: 3, pr: 'Front #41 (533313f)', rounds: '1 ronda', desc: 'Avisos éxito/info con acciones («Deshacer», «Ver propuesta») y pausa al enfocar.' },
+      { key: 'HUB-114', area: 'Frontend', sp: 5, pr: 'Front #42 (d3b8013)', rounds: '1 ronda', desc: 'Inicio «Pendiente de ti» con tarjeta destacada «Tu turno» y estados vacíos.' },
+      { key: 'HUB-115', area: 'Frontend', sp: 5, pr: 'Front #43 (aeda14c)', rounds: '1 ronda', desc: 'Espacios de trabajo con turno, filtro URL, esqueletos y «Deshacer» al eliminar.' },
+      { key: 'HUB-117', area: 'Frontend', sp: 3, pr: 'Front #44 (bd9744c)', rounds: '1 ronda', desc: 'Panel «Lectura» en visor MDX (Manrope/Literata/Atkinson, tamaño, densidad, ancla).' },
+      { key: 'HUB-111', area: 'Frontend', sp: 5, pr: 'Front #45 (27bb7ae)', rounds: '3 rondas', desc: 'Barra superior con píldora activa, menú cuenta, campana SSE y «Reconectando…».' },
+      { key: 'HUB-116', area: 'Frontend', sp: 8, pr: 'Front #46 (1217ffd)', rounds: '1 ronda', desc: 'Propuesta de cambio con recorrido, checklist «Para fusionar» y fusión confirmada.' },
+      { key: 'HUB-119', area: 'Frontend', sp: 5, pr: 'Front #47 (ae59f57)', rounds: '2 rondas', desc: 'Administración con catálogo unificado, invitaciones pendientes y file-picker.' },
+      { key: 'HUB-121', area: 'Frontend', sp: 3, pr: 'Front #48 (d501bfd)', rounds: '1 ronda', desc: 'Suite axe 9 temas × 8 pantallas (0 violaciones), crítica 36.5/40 y DESIGN.md.' }
+    ];
+
+    function renderStories(filter = 'all') {
+      const list = filter === 'all' ? stories : stories.filter(s => s.area === filter);
+      document.getElementById('stories-grid').innerHTML = list.map(st => `
+        <div class="p-3.5 rounded-lg bg-[var(--content)] border border-[var(--border)] space-y-1.5 text-xs">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-1.5">
+              <span class="font-mono font-bold px-2 py-0.5 rounded bg-[var(--card)] border border-[var(--border)]">${st.key}</span>
+              <span class="px-1.5 py-0.5 rounded bg-[var(--card)] border border-[var(--border)] text-[var(--muted-foreground)]">${st.area}</span>
+              <span class="font-mono text-[var(--muted-foreground)]">${st.sp} SP</span>
+            </div>
+            <span class="font-mono text-[var(--success)]">${st.rounds}</span>
+          </div>
+          <p class="text-[var(--foreground)] leading-relaxed">${st.desc}</p>
+          <div class="font-mono text-[var(--muted-foreground)]">${st.pr}</div>
+        </div>
+      `).join('');
+    }
+
+    document.querySelectorAll('#story-filters button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#story-filters button').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+        renderStories(btn.dataset.filter);
+      });
+    });
+
+    function drawCritique() {
+      const groups = [
+        { label: 'Acceso', before: 24, after: 36 },
+        { label: 'Espacios e Inicio', before: 21, after: 37 },
+        { label: 'Propuesta y Visor', before: 22, after: 37 },
+        { label: 'Administración', before: 21, after: 36 }
+      ];
+      const w = 520, h = 210, padL = 132, padR = 44, padT = 14, padB = 28;
+      const cw = w - padL - padR, rowH = 42;
+      const xOf = v => padL + (v / 40) * cw;
+      let svg = `<svg viewBox="0 0 ${w} ${h}" class="w-full h-auto" role="img" aria-label="Evolución de crítica de diseño">`;
+      [0, 10, 20, 30, 40].forEach(t => {
+        const x = xOf(t), isGoal = t === 30;
+        svg += `<line x1="${x}" y1="${padT - 4}" x2="${x}" y2="${h - padB}" stroke="${isGoal ? 'var(--warning)' : 'var(--border)'}" stroke-width="${isGoal ? 1.5 : 1}" ${isGoal ? 'stroke-dasharray="4 3"' : ''} />`;
+        svg += `<text x="${x}" y="${h - 8}" text-anchor="middle" fill="${isGoal ? 'var(--warning)' : 'var(--muted-foreground)'}" font-size="11" font-weight="${isGoal ? '700' : '400'}">${t}</text>`;
+      });
+      groups.forEach((g, i) => {
+        const y = padT + i * rowH + 4;
+        svg += `<text x="${padL - 10}" y="${y + 18}" text-anchor="end" fill="var(--foreground)" font-size="11.5">${g.label}</text>`;
+        svg += `<rect x="${padL}" y="${y}" width="${(g.before / 40) * cw}" height="12" rx="3" fill="var(--muted-foreground)" opacity="0.45" />`;
+        svg += `<text x="${xOf(g.before) + 5}" y="${y + 10}" fill="var(--muted-foreground)" font-size="10" font-family="monospace">${g.before}</text>`;
+        svg += `<rect x="${padL}" y="${y + 15}" width="${(g.after / 40) * cw}" height="14" rx="3" fill="var(--chart-2)" />`;
+        svg += `<text x="${xOf(g.after) + 5}" y="${y + 26}" fill="var(--foreground)" font-size="11" font-weight="700" font-family="monospace">${g.after}/40</text>`;
+      });
+      svg += `</svg>`;
+      document.getElementById('critique-chart').innerHTML = svg;
+    }
+
+    function drawCoverage() {
+      const bars = [
+        { label: 'Backend · Líneas (JaCoCo)', value: 97.52, color: 'var(--chart-1)' },
+        { label: 'Backend · Ramas (JaCoCo)', value: 90.42, color: 'var(--chart-1)' },
+        { label: 'Frontend · Funciones (Jest)', value: 96.43, color: 'var(--chart-2)' },
+        { label: 'Frontend · Líneas (Jest)', value: 96.39, color: 'var(--chart-2)' },
+        { label: 'Frontend · Sentencias (Jest)', value: 96.00, color: 'var(--chart-2)' },
+        { label: 'Frontend · Ramas (Jest)', value: 83.83, color: 'var(--chart-3)' }
+      ];
+      const rowH = 34, padL = 195, padR = 54, padT = 10, padB = 24;
+      const w = 520, h = padT + bars.length * rowH + padB, cw = w - padL - padR;
+      const xOf = v => padL + (v / 100) * cw;
+      let svg = `<svg viewBox="0 0 ${w} ${h}" class="w-full h-auto" role="img" aria-label="Cobertura Sprint 9">`;
+      [0, 50, 80, 100].forEach(t => {
+        const x = xOf(t), isGoal = t === 80;
+        svg += `<line x1="${x}" y1="${padT - 4}" x2="${x}" y2="${h - padB}" stroke="${isGoal ? 'var(--warning)' : 'var(--border)'}" stroke-width="${isGoal ? 1.5 : 1}" ${isGoal ? 'stroke-dasharray="4 3"' : ''} />`;
+        svg += `<text x="${x}" y="${h - 6}" text-anchor="middle" fill="${isGoal ? 'var(--warning)' : 'var(--muted-foreground)'}" font-size="11" font-weight="${isGoal ? '700' : '400'}">${t}%</text>`;
+      });
+      bars.forEach((d, i) => {
+        const y = padT + i * rowH + 6, bw = (d.value / 100) * cw;
+        svg += `<text x="${padL - 10}" y="${y + 13}" text-anchor="end" fill="var(--foreground)" font-size="11.5">${d.label}</text>`;
+        svg += `<rect x="${padL}" y="${y}" width="${cw}" height="16" rx="4" fill="var(--content)" />`;
+        svg += `<rect x="${padL}" y="${y}" width="${bw}" height="16" rx="4" fill="${d.color}" />`;
+        svg += `<text x="${padL + bw + 6}" y="${y + 12}" fill="var(--foreground)" font-size="11" font-weight="600" font-family="monospace">${d.value.toFixed(2)}%</text>`;
+      });
+      svg += `</svg>`;
+      document.getElementById('coverage-chart').innerHTML = svg;
+    }
+
+    renderStories();
+    drawCritique();
+    drawCoverage();
+  </script>
+</body>
+</html>
