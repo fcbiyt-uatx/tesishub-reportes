@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reporte Sprint 10 — TesisHub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --background: #f6f8fa;
+      --content: #f0f3f6;
+      --card: #ffffff;
+      --border: #d0d7de;
+      --foreground: #1f2328;
+      --muted-foreground: #656d76;
+      --code-foreground: #0550ae;
+      --primary: #1f883d;
+      --primary-foreground: #ffffff;
+      --accent: #0969da;
+      --link: #0969da;
+      --success: #1a7f37;
+      --warning: #9a6700;
+      --error: #cf222e;
+      --chart-1: #0969da;
+      --chart-2: #1f883d;
+      --chart-3: #8250df;
+      --chart-4: #bf3989;
+      --chart-5: #0e7490;
+    }
+    html.dark {
+      --background: #0d1117;
+      --content: #161b22;
+      --card: #161b22;
+      --border: #30363d;
+      --foreground: #e6edf3;
+      --muted-foreground: #8b949e;
+      --code-foreground: #79c0ff;
+      --primary: #238636;
+      --primary-foreground: #ffffff;
+      --accent: #58a6ff;
+      --link: #58a6ff;
+      --success: #3fb950;
+      --warning: #d29922;
+      --error: #f85149;
+      --chart-1: #58a6ff;
+      --chart-2: #3fb950;
+      --chart-3: #a371f7;
+      --chart-4: #f778ba;
+      --chart-5: #39c5cf;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Roboto, sans-serif; }
+    .filter-pill[aria-pressed="true"] { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+    .filter-pill[aria-pressed="false"] { background: var(--content); color: var(--muted-foreground); border-color: var(--border); }
+  </style>
+  <script>
+    (function initTheme() {
+      const saved = localStorage.getItem('tesishub-reports-theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && prefersDark)) document.documentElement.classList.add('dark');
+    })();
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('tesishub-reports-theme', isDark ? 'dark' : 'light');
+      const btn = document.getElementById('theme-toggle');
+      if (btn) btn.textContent = isDark ? '☀️ Modo claro' : '🌙 Modo oscuro';
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('theme-toggle');
+      if (btn) btn.textContent = document.documentElement.classList.contains('dark') ? '☀️ Modo claro' : '🌙 Modo oscuro';
+    });
+  </script>
+</head>
+<body class="bg-[var(--background)] text-[var(--foreground)] antialiased m-0 p-0">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <div class="flex flex-wrap items-center justify-between gap-2 text-xs pb-2">
+      <div class="flex items-center gap-2">
+        <a href="./index.html" class="text-[var(--link)] hover:underline font-medium">← Volver al Panel Histórico (Sprints 2–10)</a>
+        <span class="text-[var(--muted-foreground)]">·</span>
+        <span class="font-semibold text-[var(--foreground)]">Detalle Sprint 10</span>
+        <span class="text-[var(--muted-foreground)]">·</span>
+        <a href="./sprint-9.html" class="text-[var(--muted-foreground)] hover:underline">Sprint 9</a>
+      </div>
+      <button id="theme-toggle" type="button" onclick="toggleTheme()" class="px-2.5 py-1 rounded-md bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] hover:border-[var(--accent)] transition-colors cursor-pointer">🌙 Modo oscuro</button>
+    </div>
+
+    <header class="space-y-2 pb-4 border-b border-[var(--border)]">
+      <div class="flex flex-wrap items-center gap-2 text-xs">
+        <span class="px-2 py-0.5 rounded-full bg-[var(--card)] border border-[var(--border)] font-mono text-[var(--muted-foreground)]">Jira Sprint ID 142</span>
+        <span class="px-2 py-0.5 rounded-full bg-[var(--card)] border border-[var(--success)] text-[var(--success)] font-medium">7 / 7 Historias · 31 / 31 SP</span>
+        <span class="text-[var(--muted-foreground)]">25 – 26 nov 2026</span>
+      </div>
+      <h1 class="text-2xl font-bold tracking-tight">Reporte Sprint 10 — Navegación, Visor Continuo y Editor Markdown en Comentarios</h1>
+      <p class="text-sm text-[var(--muted-foreground)]">
+        Correcciones de revisión del sistema: migas de pan y jerarquía en Inicio, pestañas bajo el título con Resumen por defecto, comentarios generales en línea de tiempo, hoja continua con índice navegable y editor compartido con formato Markdown seguro vía <code>@defer</code>.
+      </p>
+    </header>
+
+    <!-- KPIs -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1">
+        <div class="text-xs text-[var(--muted-foreground)]">Historias / Story Points</div>
+        <div class="text-2xl font-bold tabular-nums">7 / 7 <span class="text-sm font-normal text-[var(--success)]">31 SP</span></div>
+        <p class="text-xs text-[var(--muted-foreground)]">7 PRs Frontend (#50–#56) fusionados en <code>develop</code>.</p>
+      </div>
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1">
+        <div class="text-xs text-[var(--muted-foreground)]">Suite de Pruebas al Cierre</div>
+        <div class="text-2xl font-bold tabular-nums">3,742 <span class="text-xs font-mono text-[var(--success)]">+218</span></div>
+        <p class="text-xs text-[var(--muted-foreground)]">1,573 Back · 1,760 Jest · 308 E2E · 93 MDX · 8 Infra.</p>
+      </div>
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1">
+        <div class="text-xs text-[var(--muted-foreground)]">Bundle Inicial (Presupuesto ≤ 750 kB)</div>
+        <div class="text-2xl font-bold tabular-nums">749.12 kB <span class="text-xs font-mono text-[var(--success)]">+1.71</span></div>
+        <p class="text-xs text-[var(--muted-foreground)]">180.86 kB transfer · 0 warnings · Markdown y vista previa en <code>@defer</code>.</p>
+      </div>
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1">
+        <div class="text-xs text-[var(--muted-foreground)]">Bloqueantes Pre-Merge</div>
+        <div class="text-2xl font-bold tabular-nums">3 <span class="text-sm font-normal text-[var(--muted-foreground)]">atrapados</span></div>
+        <p class="text-xs text-[var(--muted-foreground)]">2 🔴 empíricos + 1 🟠 corregidos antes del merge (1.43 rondas/PR).</p>
+      </div>
+    </section>
+
+    <!-- Charts: Bundle Evolution + Coverage -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+        <div>
+          <h2 class="text-base font-semibold">Presupuesto del Bundle Inicial en Sprint 10 (≤ 750 kB)</h2>
+          <p class="text-xs text-[var(--muted-foreground)]">Control estricto por historia (<code>npx ng build</code>, 0 warnings); <code>HUB-131</code> y <code>HUB-132</code> aislados vía <code>@defer</code>.</p>
+        </div>
+        <div id="bundle-chart"></div>
+      </section>
+
+      <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+        <div>
+          <h2 class="text-base font-semibold">Cobertura Final de Pruebas (Gate ≥ 80%)</h2>
+          <p class="text-xs text-[var(--muted-foreground)]">JaCoCo en <code>tesishub-backend</code> (<code>88ba4ac</code>) y Jest en <code>tesishub-frontend</code> (<code>664d118</code>).</p>
+        </div>
+        <div id="coverage-chart"></div>
+      </section>
+    </div>
+
+    <!-- Empirical catches -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
+      <h2 class="text-base font-semibold">Hallazgos Empíricos Interceptados antes del Merge (Maker–Checker)</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+        <div class="p-3.5 rounded-lg bg-[var(--content)] border border-[var(--border)] space-y-1">
+          <div class="font-semibold text-[var(--error)]">🔴 HUB-126 · Contraste en forced-colors: active</div>
+          <p class="text-[var(--muted-foreground)]"><code>turn-card.ts</code> perdía borde/contraste en modo de alto contraste del sistema. Corregido con media query <code>forced-colors: active</code> y prueba de regresión.</p>
+        </div>
+        <div class="p-3.5 rounded-lg bg-[var(--content)] border border-[var(--border)] space-y-1">
+          <div class="font-semibold text-[var(--error)]">🔴 HUB-127 · focusRequest al cambiar pestaña</div>
+          <p class="text-[var(--muted-foreground)]">Al cambiar manualmente de pestaña, <code>focusRequest</code> de «Ir al siguiente» seguía activo y robaba el foco del <code>tablist</code>. Corregido en <code>onTabChange</code> + 4 pruebas.</p>
+        </div>
+        <div class="p-3.5 rounded-lg bg-[var(--content)] border border-[var(--border)] space-y-1">
+          <div class="font-semibold text-[var(--warning)]">🟠 HUB-129 · Superficie y contraste Darcula AA</div>
+          <p class="text-[var(--muted-foreground)]">Faltaba <code>background: var(--surface-2)</code> en bloques modificados; al aplicarlo se ajustó Darcula <code>--diff-add: #64eb94</code> (5.00:1) y <code>--diff-del: #ffbcb5</code> (4.72:1).</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Operational note -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 text-xs text-[var(--muted-foreground)] flex flex-wrap items-center justify-between gap-2">
+      <div>
+        <strong class="text-[var(--foreground)]">Nota operativa (GitHub Actions):</strong> A partir del PR #55 (<code>HUB-131</code>) y en el PR #56 (<code>HUB-132</code>), GitHub Actions alcanzó el límite de gasto de la cuenta. Ambos PRs se verificaron ejecutando localmente todas las compuertas y Playwright E2E tanto en Maker como en Checker antes del merge.
+      </div>
+      <span class="font-mono px-2 py-0.5 rounded bg-[var(--content)] border border-[var(--border)] text-[var(--foreground)]">Esfuerzo: medium</span>
+    </section>
+
+    <!-- Filterable Stories Table -->
+    <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 class="text-base font-semibold">Entregables del Sprint 10 (7 Historias · 31 SP)</h2>
+          <p class="text-xs text-[var(--muted-foreground)]">Filtra por enfoque funcional.</p>
+        </div>
+        <div class="flex flex-wrap gap-1.5 text-xs" id="story-filters">
+          <button type="button" class="filter-pill px-2.5 py-1 rounded-md border cursor-pointer" aria-pressed="true" data-filter="all">Todas (7)</button>
+          <button type="button" class="filter-pill px-2.5 py-1 rounded-md border cursor-pointer" aria-pressed="false" data-filter="Navegación y Resumen">Navegación y Resumen (3)</button>
+          <button type="button" class="filter-pill px-2.5 py-1 rounded-md border cursor-pointer" aria-pressed="false" data-filter="Documento">Documento (2)</button>
+          <button type="button" class="filter-pill px-2.5 py-1 rounded-md border cursor-pointer" aria-pressed="false" data-filter="Comentarios">Comentarios (2)</button>
+        </div>
+      </div>
+      <div id="stories-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+    </section>
+  </div>
+
+  <script>
+    const stories = [
+      { key: 'HUB-126', area: 'Navegación y Resumen', sp: 5, pr: 'Front #50 (f08fce6)', rounds: '2 rondas', desc: 'Migas de pan en Inicio, Espacios y Propuesta, y jerarquía de Inicio con «Tu turno» en contenedor principal.' },
+      { key: 'HUB-127', area: 'Navegación y Resumen', sp: 5, pr: 'Front #51 (a2588fe)', rounds: '2 rondas', desc: 'Pestañas Resumen, Versiones y Documento debajo del título con Resumen por defecto + timeout E2E CI 15 → 30 min.' },
+      { key: 'HUB-128', area: 'Navegación y Resumen', sp: 3, pr: 'Front #52 (0af0be8)', rounds: '1 ronda', desc: 'Comentarios generales en la línea de tiempo y formulario de comentario general siempre visible en Resumen.' },
+      { key: 'HUB-129', area: 'Documento', sp: 5, pr: 'Front #53 (25bca03)', rounds: '2 rondas', desc: 'Documento como hoja de papel continua con comentarios flotantes junto a su bloque y contraste Darcula AA.' },
+      { key: 'HUB-130', area: 'Documento', sp: 5, pr: 'Front #54 (7400808)', rounds: '1 ronda', desc: 'Índice de navegación por encabezados, contraíble, con comentarios abiertos y cambios por sección.' },
+      { key: 'HUB-131', area: 'Comentarios', sp: 3, pr: 'Front #55 (2f5ed4c)', rounds: '1 ronda', desc: 'Markdown limitado en tarjetas de comentario con lista blanca cerrada vía @defer (+0.00 kB inicial, 0 innerHTML).' },
+      { key: 'HUB-132', area: 'Comentarios', sp: 5, pr: 'Front #56 (664d118)', rounds: '1 ronda', desc: 'Editor compartido app-comment-form con barra de formato, atajos Ctrl/Cmd+B/I/K y vista previa @defer.' }
+    ];
+
+    function renderStories(filter = 'all') {
+      const list = filter === 'all' ? stories : stories.filter(s => s.area === filter);
+      document.getElementById('stories-grid').innerHTML = list.map(st => `
+        <div class="p-3.5 rounded-lg bg-[var(--content)] border border-[var(--border)] space-y-1.5 text-xs">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-1.5">
+              <span class="font-mono font-bold px-2 py-0.5 rounded bg-[var(--card)] border border-[var(--border)]">${st.key}</span>
+              <span class="px-1.5 py-0.5 rounded bg-[var(--card)] border border-[var(--border)] text-[var(--muted-foreground)]">${st.area}</span>
+              <span class="font-mono text-[var(--muted-foreground)]">${st.sp} SP</span>
+            </div>
+            <span class="font-mono text-[var(--success)]">${st.rounds}</span>
+          </div>
+          <p class="text-[var(--foreground)] leading-relaxed">${st.desc}</p>
+          <div class="font-mono text-[var(--muted-foreground)]">${st.pr}</div>
+        </div>
+      `).join('');
+    }
+
+    document.querySelectorAll('#story-filters button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#story-filters button').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+        renderStories(btn.dataset.filter);
+      });
+    });
+
+    function drawBundleChart() {
+      const points = [
+        { label: 'Sprint 9', kb: 747.41 },
+        { label: 'HUB-127', kb: 748.89 },
+        { label: 'HUB-128', kb: 749.01 },
+        { label: 'HUB-129', kb: 749.01 },
+        { label: 'HUB-130', kb: 749.08 },
+        { label: 'HUB-131', kb: 749.08 },
+        { label: 'HUB-132', kb: 749.12 }
+      ];
+      const w = 520, h = 215, padL = 78, padR = 54, padT = 14, padB = 26;
+      const cw = w - padL - padR, rowH = 25, minKB = 745, maxKB = 751;
+      const xOf = v => padL + ((v - minKB) / (maxKB - minKB)) * cw;
+      let svg = `<svg viewBox="0 0 ${w} ${h}" class="w-full h-auto" role="img" aria-label="Evolución del bundle inicial en Sprint 10">`;
+      [746, 748, 750].forEach(t => {
+        const x = xOf(t), isLimit = t === 750;
+        svg += `<line x1="${x}" y1="${padT - 4}" x2="${x}" y2="${h - padB}" stroke="${isLimit ? 'var(--error)' : 'var(--border)'}" stroke-width="${isLimit ? 1.5 : 1}" ${isLimit ? 'stroke-dasharray="4 3"' : ''} />`;
+        svg += `<text x="${x}" y="${h - 6}" text-anchor="middle" fill="${isLimit ? 'var(--error)' : 'var(--muted-foreground)'}" font-size="10.5" font-weight="${isLimit ? '700' : '400'}">${t} kB${isLimit ? ' máx' : ''}</text>`;
+      });
+      points.forEach((p, i) => {
+        const y = padT + i * rowH + 3, bw = Math.max(4, xOf(p.kb) - padL);
+        svg += `<text x="${padL - 8}" y="${y + 12}" text-anchor="end" fill="var(--foreground)" font-size="11" font-family="monospace">${p.label}</text>`;
+        svg += `<rect x="${padL}" y="${y}" width="${cw}" height="15" rx="3" fill="var(--content)" />`;
+        svg += `<rect x="${padL}" y="${y}" width="${bw}" height="15" rx="3" fill="${i === 0 ? 'var(--chart-1)' : 'var(--chart-2)'}" />`;
+        svg += `<text x="${padL + bw + 5}" y="${y + 11.5}" fill="var(--foreground)" font-size="10.5" font-weight="600" font-family="monospace">${p.kb.toFixed(2)} kB</text>`;
+      });
+      svg += `</svg>`;
+      document.getElementById('bundle-chart').innerHTML = svg;
+    }
+
+    function drawCoverage() {
+      const bars = [
+        { label: 'Backend · Líneas (JaCoCo)', value: 97.52, color: 'var(--chart-1)' },
+        { label: 'Backend · Ramas (JaCoCo)', value: 90.42, color: 'var(--chart-1)' },
+        { label: 'Frontend · Funciones (Jest)', value: 96.65, color: 'var(--chart-2)' },
+        { label: 'Frontend · Líneas (Jest)', value: 96.28, color: 'var(--chart-2)' },
+        { label: 'Frontend · Sentencias (Jest)', value: 95.93, color: 'var(--chart-2)' },
+        { label: 'Frontend · Ramas (Jest)', value: 84.71, color: 'var(--chart-3)' }
+      ];
+      const rowH = 34, padL = 195, padR = 54, padT = 10, padB = 24;
+      const w = 520, h = padT + bars.length * rowH + padB, cw = w - padL - padR;
+      const xOf = v => padL + (v / 100) * cw;
+      let svg = `<svg viewBox="0 0 ${w} ${h}" class="w-full h-auto" role="img" aria-label="Cobertura Sprint 10">`;
+      [0, 50, 80, 100].forEach(t => {
+        const x = xOf(t), isGoal = t === 80;
+        svg += `<line x1="${x}" y1="${padT - 4}" x2="${x}" y2="${h - padB}" stroke="${isGoal ? 'var(--warning)' : 'var(--border)'}" stroke-width="${isGoal ? 1.5 : 1}" ${isGoal ? 'stroke-dasharray="4 3"' : ''} />`;
+        svg += `<text x="${x}" y="${h - 6}" text-anchor="middle" fill="${isGoal ? 'var(--warning)' : 'var(--muted-foreground)'}" font-size="11" font-weight="${isGoal ? '700' : '400'}">${t}%</text>`;
+      });
+      bars.forEach((d, i) => {
+        const y = padT + i * rowH + 6, bw = (d.value / 100) * cw;
+        svg += `<text x="${padL - 10}" y="${y + 13}" text-anchor="end" fill="var(--foreground)" font-size="11.5">${d.label}</text>`;
+        svg += `<rect x="${padL}" y="${y}" width="${cw}" height="16" rx="4" fill="var(--content)" />`;
+        svg += `<rect x="${padL}" y="${y}" width="${bw}" height="16" rx="4" fill="${d.color}" />`;
+        svg += `<text x="${padL + bw + 6}" y="${y + 12}" fill="var(--foreground)" font-size="11" font-weight="600" font-family="monospace">${d.value.toFixed(2)}%</text>`;
+      });
+      svg += `</svg>`;
+      document.getElementById('coverage-chart').innerHTML = svg;
+    }
+
+    renderStories();
+    drawBundleChart();
+    drawCoverage();
+  </script>
+</body>
+</html>

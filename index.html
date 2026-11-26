@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Panel Histórico de Sprints (2–9) — TesisHub</title>
+  <title>Panel Histórico de Sprints (2–10) — TesisHub</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root {
@@ -103,7 +103,7 @@
 <body class="bg-[var(--background)] text-[var(--foreground)] antialiased m-0 p-0">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
     <div class="flex flex-wrap items-center justify-between gap-2 text-xs pb-2">
-      <div class="flex items-center gap-2"><span class="font-semibold text-[var(--foreground)]">Panel Histórico (Sprints 2–9)</span><span class="text-[var(--muted-foreground)]">·</span><a href="./sprint-9.html" class="text-[var(--link)] hover:underline font-medium">Ver Reporte Detallado Sprint 9 →</a><span class="text-[var(--muted-foreground)]">·</span><a href="./sprint-8.html" class="text-[var(--muted-foreground)] hover:underline">Sprint 8</a></div>
+      <div class="flex items-center gap-2"><span class="font-semibold text-[var(--foreground)]">Panel Histórico (Sprints 2–10)</span><span class="text-[var(--muted-foreground)]">·</span><a href="./sprint-10.html" class="text-[var(--link)] hover:underline font-medium">Ver Reporte Detallado Sprint 10 →</a><span class="text-[var(--muted-foreground)]">·</span><a href="./sprint-9.html" class="text-[var(--muted-foreground)] hover:underline">Sprint 9</a><span class="text-[var(--muted-foreground)]">·</span><a href="./sprint-8.html" class="text-[var(--muted-foreground)] hover:underline">Sprint 8</a></div>
       <button id="theme-toggle" type="button" onclick="toggleTheme()" class="px-2.5 py-1 rounded-md bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] hover:border-[var(--accent)] transition-colors cursor-pointer">🌙 Modo oscuro</button>
     </div>
     <!-- Header -->
@@ -112,10 +112,10 @@
         <div class="space-y-1">
           <div class="flex flex-wrap items-center gap-2 text-xs">
             <span class="px-2 py-0.5 rounded-full bg-[var(--card)] border border-[var(--border)] font-mono text-[var(--muted-foreground)]">TesisHub · Módulo 1</span>
-            <span class="px-2 py-0.5 rounded-full bg-[var(--card)] border border-[var(--success)] text-[var(--success)] font-medium">66 / 66 Historias Completadas</span>
-            <span class="text-[var(--muted-foreground)]">8 Sprints Documentados (Nov 2026)</span>
+            <span class="px-2 py-0.5 rounded-full bg-[var(--card)] border border-[var(--success)] text-[var(--success)] font-medium">73 / 73 Historias Completadas</span>
+            <span class="text-[var(--muted-foreground)]">9 Sprints Documentados (Nov 2026)</span>
           </div>
-          <h1 class="text-2xl font-bold tracking-tight">Panel Histórico de Sprints (2 – 9)</h1>
+          <h1 class="text-2xl font-bold tracking-tight">Panel Histórico de Sprints (2 – 10)</h1>
           <p class="text-sm text-[var(--muted-foreground)]">
             Explora la evolución acumulada del proyecto o selecciona cualquier sprint individual para revisar sus entregables, cobertura y hallazgos Maker–Checker.
           </p>
@@ -519,6 +519,52 @@
           { key: 'HUB-119', sp: 5, area: 'Frontend', pr: 'Front #47 (ae59f57)', rounds: '2 rondas', desc: 'Administración con catálogo unificado, invitaciones pendientes y file-picker.' },
           { key: 'HUB-121', sp: 3, area: 'Frontend', pr: 'Front #48 (d501bfd)', rounds: '1 ronda', desc: 'Suite axe 9 temas × 8 pantallas (0 violaciones), crítica 36.5/40 y DESIGN.md.' }
         ]
+      },
+      {
+        id: 's10',
+        shortLabel: 'Sprint 10',
+        title: 'Sprint 10 — Navegación, Visor Continuo y Editor Markdown en Comentarios',
+        jiraId: 'ID 142',
+        date: '25–26 nov 2026',
+        sp: 31,
+        storiesDone: 7,
+        storiesTotal: 7,
+        prsCount: 7,
+        avgRounds: '1.43 rondas/PR',
+        repos: ['tesishub-frontend'],
+        summary: 'Correcciones de revisión del sistema: migas de pan y jerarquía en Inicio, pestañas bajo el título con Resumen por defecto, comentarios generales en línea de tiempo, Documento en hoja continua con índice por encabezados y editor compartido con barra Markdown y vista previa vía @defer (749.12 kB ≤ 750 kB).',
+        metrics: {
+          backTests: 1573,
+          frontJest: 1760,
+          frontPlaywright: 308,
+          mdxValidador: 93,
+          infraE2e: 8,
+          backCoverage: '97.52% líneas / 90.42% ramas',
+          frontCoverage: '95.93% stmts / 84.71% branches',
+          bugsCaught: 3,
+          bundleNote: '749.12 kB inicial (≤ 750 kB, 0 warnings; +1.71 kB vs S9 gracias a @defer)'
+        },
+        highlights: [
+          'Migas de pan en Inicio, Espacios y Propuesta + contenedor principal «Tu turno» (HUB-126).',
+          'Pestañas Resumen, Versiones y Documento debajo del título con Resumen por defecto + CI E2E timeout 15 → 30 min (HUB-127).',
+          'Comentarios generales en la línea de tiempo y formulario siempre visible en Resumen (HUB-128).',
+          'Visor de Documento en hoja continua con comentarios flotantes e índice lateral contraíble (HUB-129, HUB-130).',
+          'Markdown limitado seguro en tarjetas y editor compartido app-comment-form con barra, atajos Ctrl/Cmd+B/I/K y vista previa @defer (HUB-131, HUB-132).'
+        ],
+        catches: [
+          '🔴 HUB-126 (R1→R2): contraste/borde perdido en turn-card.ts bajo forced-colors: active; corregido con media query y prueba.',
+          '🔴 HUB-127 (R1→R2): focusRequest no se limpiaba al cambiar manualmente de pestaña en onTabChange; corregido + 4 pruebas de regresión.',
+          '🟠 HUB-129 (R1→R2): faltaba background: var(--surface-2) en bloques modificados + ajuste AA en Darcula (--diff-add #64eb94 / --diff-del #ffbcb5).'
+        ],
+        stories: [
+          { key: 'HUB-126', sp: 5, area: 'Frontend', pr: 'Front #50 (f08fce6)', rounds: '2 rondas', desc: 'Migas de pan en Inicio, Espacios y Propuesta, y jerarquía de Inicio con «Tu turno».' },
+          { key: 'HUB-127', sp: 5, area: 'Frontend', pr: 'Front #51 (a2588fe)', rounds: '2 rondas', desc: 'Pestañas Resumen, Versiones y Documento bajo el título con Resumen por defecto.' },
+          { key: 'HUB-128', sp: 3, area: 'Frontend', pr: 'Front #52 (0af0be8)', rounds: '1 ronda', desc: 'Comentarios generales en línea de tiempo y formulario siempre visible en Resumen.' },
+          { key: 'HUB-129', sp: 5, area: 'Frontend', pr: 'Front #53 (25bca03)', rounds: '2 rondas', desc: 'Documento como hoja de papel continua con comentarios flotantes junto a su bloque.' },
+          { key: 'HUB-130', sp: 5, area: 'Frontend', pr: 'Front #54 (7400808)', rounds: '1 ronda', desc: 'Índice de navegación por encabezados, contraíble, con comentarios y cambios por sección.' },
+          { key: 'HUB-131', sp: 3, area: 'Frontend', pr: 'Front #55 (2f5ed4c)', rounds: '1 ronda', desc: 'Markdown limitado en tarjetas con lista blanca cerrada vía @defer (+0.00 kB inicial).' },
+          { key: 'HUB-132', sp: 5, area: 'Frontend', pr: 'Front #56 (664d118)', rounds: '1 ronda', desc: 'Editor compartido app-comment-form con barra de formato, atajos y vista previa @defer.' }
+        ]
       }
     ];
 
@@ -527,7 +573,7 @@
     function renderNav() {
       const nav = document.getElementById('sprint-nav');
       const items = [
-        { id: 'global', label: 'Vista Global (Sprints 2–9)' },
+        { id: 'global', label: 'Vista Global (Sprints 2–10)' },
         { id: 'orchestration', label: 'Configuración de Orquestación' },
         ...sprints.map(s => ({ id: s.id, label: s.shortLabel }))
       ];
@@ -560,7 +606,7 @@
           <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1.5">
             <div class="text-xs text-[var(--muted-foreground)]">Historias Finalizadas</div>
             <div class="text-2xl font-bold tabular-nums">${totalStories} / ${totalStories} <span class="text-xs font-mono text-[var(--success)]">100%</span></div>
-            <p class="text-xs text-[var(--muted-foreground)]">${totalSpKnown} SP registrados entre Sprints 4 y 9 (S2–S3 sin SP en reporte).</p>
+            <p class="text-xs text-[var(--muted-foreground)]">${totalSpKnown} SP registrados entre Sprints 4 y 10 (S2–S3 sin SP en reporte).</p>
           </div>
           <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1.5">
             <div class="text-xs text-[var(--muted-foreground)]">Pull Requests Auditados</div>
@@ -569,8 +615,8 @@
           </div>
           <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1.5">
             <div class="text-xs text-[var(--muted-foreground)]">Crecimiento Suite de Pruebas</div>
-            <div class="text-2xl font-bold tabular-nums">204 → 3,524</div>
-            <p class="text-xs text-[var(--muted-foreground)]">Multiplicado ×17.3 entre Sprint 2 y Sprint 9 con 0 fallos.</p>
+            <div class="text-2xl font-bold tabular-nums">204 → 3,742</div>
+            <p class="text-xs text-[var(--muted-foreground)]">Multiplicado ×18.3 entre Sprint 2 y Sprint 10 con 0 fallos.</p>
           </div>
           <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-1.5">
             <div class="text-xs text-[var(--muted-foreground)]">Bloqueantes Atrapados</div>
@@ -584,7 +630,7 @@
           <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
             <div class="flex items-start justify-between gap-2">
               <div>
-                <h2 class="text-base font-semibold">Crecimiento Acumulado de Pruebas (Sprints 2–9)</h2>
+                <h2 class="text-base font-semibold">Crecimiento Acumulado de Pruebas (Sprints 2–10)</h2>
                 <p class="text-xs text-[var(--muted-foreground)]">Evolución de tests en Backend (Surefire+Failsafe), Frontend Jest y Playwright/Validador.</p>
               </div>
               <div class="flex flex-wrap gap-2 text-xs text-[var(--muted-foreground)]">
@@ -649,12 +695,12 @@
       const container = document.getElementById('global-tests-chart');
       const w = 520, h = 240, padL = 44, padR = 16, padT = 18, padB = 34;
       const chartW = w - padL - padR, chartH = h - padT - padB;
-      const maxVal = 3600;
-      const barW = 32;
+      const maxVal = 4000;
+      const barW = 28;
       const step = chartW / sprints.length;
 
       let svg = `<svg viewBox="0 0 ${w} ${h}" class="w-full h-auto" role="img" aria-label="Crecimiento acumulado de pruebas por sprint">`;
-      [0, 900, 1800, 2700, 3600].forEach(t => {
+      [0, 1000, 2000, 3000, 4000].forEach(t => {
         const y = padT + chartH - (t / maxVal) * chartH;
         svg += `<line x1="${padL}" y1="${y}" x2="${w - padR}" y2="${y}" stroke="var(--border)" stroke-width="1" />`;
         svg += `<text x="${padL - 6}" y="${y + 4}" text-anchor="end" fill="var(--muted-foreground)" font-size="10.5" font-family="monospace">${t}</text>`;
@@ -695,7 +741,7 @@
       const chartW = w - padL - padR, chartH = h - padT - padB;
       const maxVal = 24;
       const step = chartW / sprints.length;
-      const bw = 16;
+      const bw = 14;
 
       let svg = `<svg viewBox="0 0 ${w} ${h}" class="w-full h-auto" role="img" aria-label="Historias completadas y bloqueantes atrapados por sprint">`;
       [0, 6, 12, 18, 24].forEach(t => {
@@ -874,6 +920,11 @@
           span: 'Sprint 9',
           badge: 'Escala 22 Historias (83 SP)',
           detail: 'Ejecución de 22 historias en 2 días combinando Claude Code CLI Opus (esfuerzo xhigh → medium) y failover automático a Swarm UI (Argon, Neon y Flash 3.8), con 10 bloqueantes atrapados pre-merge y 0 regresiones.'
+        },
+        {
+          span: 'Sprint 10',
+          badge: 'Esfuerzo Medium + Verificación Local',
+          detail: '7 historias (31 SP) con esfuerzo medium unificado (Claude Code CLI Opus + failover a Swarm Argon), @defer para mantener el bundle en 749.12 kB y verificación E2E local en Maker y Checker ante el límite de gasto en GitHub Actions.'
         }
       ];
 
@@ -972,7 +1023,7 @@
         <!-- Evolution across Sprints -->
         <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
           <div>
-            <h2 class="text-base font-semibold">Evolución de la Orquestación (Sprints 2 – 9)</h2>
+            <h2 class="text-base font-semibold">Evolución de la Orquestación (Sprints 2 – 10)</h2>
             <p class="text-xs text-[var(--muted-foreground)]">Cómo evolucionó el pipeline autónomo desde el experimento inicial hasta el failover completo en Swarm UI.</p>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
