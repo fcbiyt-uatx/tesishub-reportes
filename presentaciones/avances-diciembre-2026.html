@@ -1613,65 +1613,65 @@
       </div>
     </section>
 
-    <!-- SLIDE 10: AVANCES Y MÉTRICAS REALES -->
-    <section class="slide" data-section="Avances" data-title="Métricas Reales: Sprint Experimental y Sprint 3" data-notes="Tiempo sugerido: 2 min. Presenta los números verificados de ambos reportes de sprint. Destaca el 100% de cierre, el promedio de 1.16 rondas por PR, 0% falsos positivos, y el crecimiento de la suite de pruebas.">
+    <!-- SLIDE 11: AVANCES Y MÉTRICAS REALES (SPRINTS 2-10) -->
+    <section class="slide" data-section="Avances" data-title="Métricas Reales Acumuladas (Sprints 2–10)" data-notes="Tiempo sugerido: 2 min. Presenta los números reales acumulados desde el Sprint Experimental (2) hasta el Sprint 10: 73/73 historias, 80 PRs, 3,742 pruebas automatizadas en 5 niveles y 34 bloqueantes interceptados antes de llegar a develop.">
       <div class="slide-inner">
         <div class="slide-header">
-          <h2>Avances comprobados en Sprint Experimental y Sprint 3</h2>
-          <p class="lead">12 de 12 historias completadas y fusionadas a <code>develop</code> con 100% de pipelines en verde.</p>
+          <h2>Avances acumulados hasta el Sprint 10</h2>
+          <p class="lead"><strong>73 de 73 historias</strong> completadas en 9 sprints y <strong>80 PRs</strong> fusionados a <code>develop</code> con 100% de gates en verde.</p>
         </div>
         <div class="grid-4" style="margin-bottom:20px;">
           <div class="panel panel-accent-cyan">
-            <div class="mono text-cyan" style="font-size:2rem; font-weight:700;">12 / 12</div>
-            <div style="font-size:0.88rem; color:var(--text-secondary); margin-top:4px;">Historias completadas (5 Exp + 7 Sprint 3)</div>
+            <div class="mono text-cyan" style="font-size:2rem; font-weight:700;">73 / 73</div>
+            <div style="font-size:0.86rem; color:var(--text-secondary); margin-top:4px;">Historias completadas (Sprints 2–10 · 80 PRs)</div>
           </div>
           <div class="panel panel-accent-emerald">
-            <div class="mono text-emerald" style="font-size:2rem; font-weight:700;">363 + 273</div>
-            <div style="font-size:0.88rem; color:var(--text-secondary); margin-top:4px;">Tests Backend (Unit + Integración / 89 HTTP)</div>
-          </div>
-          <div class="panel panel-accent-indigo">
-            <div class="mono text-indigo" style="font-size:2rem; font-weight:700;">285 + 41</div>
-            <div style="font-size:0.88rem; color:var(--text-secondary); margin-top:4px;">Tests Frontend (99.17% Jest + Playwright E2E)</div>
+            <div class="mono text-emerald" style="font-size:2rem; font-weight:700;">3,742</div>
+            <div style="font-size:0.86rem; color:var(--text-secondary); margin-top:4px;">Pruebas totales (1,573 Back · 1,760 Jest · 308 E2E · 93 MDX · 8 Infra)</div>
           </div>
           <div class="panel panel-accent-amber">
-            <div class="mono text-amber" style="font-size:2rem; font-weight:700;">0%</div>
-            <div style="font-size:0.88rem; color:var(--text-secondary); margin-top:4px;">Falsos positivos reportados en auditorías</div>
+            <div class="mono text-amber" style="font-size:2rem; font-weight:700;">34</div>
+            <div style="font-size:0.86rem; color:var(--text-secondary); margin-top:4px;">Bloqueantes pre-merge atrapados empíricamente</div>
+          </div>
+          <div class="panel panel-accent-indigo">
+            <div class="mono text-indigo" style="font-size:2rem; font-weight:700;">749.12 kB</div>
+            <div style="font-size:0.86rem; color:var(--text-secondary); margin-top:4px;">Bundle inicial Frontend (límite ≤ 750 kB · 0 warnings)</div>
           </div>
         </div>
         <div class="panel" style="padding:16px 20px;">
           <table class="data-table">
             <thead>
               <tr>
-                <th>Ticket</th>
-                <th>Repo</th>
-                <th>Entregable clave (Sprint 3 · CU-01 End-to-End)</th>
-                <th>Rondas</th>
+                <th>Etapa</th>
+                <th>Historias / PRs</th>
+                <th>Pruebas al cierre</th>
+                <th>Hitos principales</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>HUB-67 / 87</td>
-                <td>Backend</td>
-                <td>Plantillas institucionales, validador ZIP (<code>RV-01..08</code>) y corpus de 34 archivos</td>
-                <td>1 / 2</td>
+                <td>Sprints 2–3</td>
+                <td>12 / 13 PRs</td>
+                <td>636 Back · 285 Jest · 41 E2E</td>
+                <td>Base Maker–Checker, CU-01 Proyectos, validador ZIP (<code>RV-01..08</code>), Fake Entra ID</td>
               </tr>
               <tr>
-                <td>HUB-43</td>
-                <td>Backend</td>
-                <td>5 endpoints de Proyectos (CU-01), migración Flyway <code>V10</code> y rollback con <code>VersioningPort</code></td>
-                <td>1</td>
+                <td>Sprints 4–6</td>
+                <td>16 / 17 PRs</td>
+                <td>799 Back · 532 Jest · 71 E2E · 49 MDX</td>
+                <td>Propuestas de cambio, flujo MDX canónico y validador dedicado</td>
               </tr>
               <tr>
-                <td>HUB-83 / 84</td>
-                <td>BE / Infra</td>
-                <td>Fake Entra ID en Docker + Suite HTTP REST Assured (89 tests caja negra)</td>
-                <td>1</td>
+                <td>Sprints 7–8</td>
+                <td>16 / 21 PRs</td>
+                <td>1,507 Back · 822 Jest · 106 E2E · 8 Infra</td>
+                <td>Revisión IA + asesor, suites <code>tesishub-infra</code> E2E, 13 bloqueantes atrapados</td>
               </tr>
               <tr>
-                <td>HUB-85 / 53</td>
-                <td>Frontend</td>
-                <td>Fixtures OpenAPI, UI <code>ProjectList</code> / <code>ProjectForm</code>, 0 violaciones Axe</td>
-                <td>1</td>
+                <td>Sprints 9–10</td>
+                <td>29 / 29 PRs</td>
+                <td>1,573 Back · 1,760 Jest · 308 E2E · 93 MDX</td>
+                <td>Navegación, visor continuo, editor Markdown en <code>@defer</code> y contraste AA</td>
               </tr>
             </tbody>
           </table>
