@@ -1504,11 +1504,11 @@
     </section>
 
     <!-- SLIDE 8: GIT WORKTREES & ISOLATION -->
-    <section class="slide" data-section="Metodología" data-title="Aislamiento con Git Worktrees y Junctions" data-notes="Tiempo sugerido: 1.5 min. Explica la ingeniería práctica detrás del entorno: cómo evitar que Maker, Checker y el IDE del humano se pisen los archivos o colapsen OneDrive.">
+    <section class="slide" data-section="Metodología" data-title="Aislamiento con Git Worktrees y Junctions" data-notes="Tiempo sugerido: 1.5 min. Explica la ingeniería práctica detrás del entorno: cómo evitar que Maker, Checker y el IDE del humano se pisen los archivos ni degraden el rendimiento de compilación.">
       <div class="slide-inner">
         <div class="slide-header">
           <h2>Aislamiento físico con Git Worktrees</h2>
-          <p class="lead">Tres árboles de trabajo independientes compartiendo un mismo objeto Git, sin colisiones ni sincronización con OneDrive.</p>
+          <p class="lead">Tres árboles de trabajo independientes compartiendo un mismo repositorio Git, sin colisiones ni bloqueos de I/O.</p>
         </div>
         <div class="grid-3">
           <div class="panel panel-accent-indigo">
@@ -1535,7 +1535,7 @@
         </div>
         <div class="panel" style="margin-top:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
           <div>
-            <h3>Redirección de I/O fuera de OneDrive (NTFS Junctions)</h3>
+            <h3>Redirección de I/O de compilación (NTFS Junctions)</h3>
             <p style="color:var(--text-secondary); font-size:0.92rem;">
               Los directorios pesados (<code>target</code>, <code>.angular</code>, <code>dist</code>, <code>coverage</code>, <code>node_modules</code>) apuntan a <code>C:\DevTargets\...</code>, evitando bloqueos de sincronización y acelerando compilaciones.
             </p>
