@@ -1,0 +1,2253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TesisHub — Avances de Implementación y Metodología Multi-Agente</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-void: #060911;
+      --bg-surface: #0c1220;
+      --bg-elevated: #131c31;
+      --bg-glass: rgba(13, 18, 32, 0.78);
+      --border-subtle: rgba(148, 163, 184, 0.14);
+      --border-strong: rgba(56, 189, 248, 0.35);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #22d3ee;
+      --accent-indigo: #818cf8;
+      --accent-emerald: #34d399;
+      --accent-amber: #fbbf24;
+      --accent-rose: #fb7185;
+      --font-display: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+      --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    ::selection {
+      background: rgba(34, 211, 238, 0.28);
+      color: var(--text-primary);
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg-void);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+
+    /* WebGL 3D Canvas Background */
+    #bg-3d {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Subtle radial vignette so content always has >= 4.5:1 contrast */
+    .bg-vignette {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 18% 20%, rgba(34, 211, 238, 0.06), transparent 45%),
+        radial-gradient(circle at 82% 78%, rgba(129, 140, 248, 0.07), transparent 48%),
+        radial-gradient(ellipse at center, transparent 45%, rgba(6, 9, 17, 0.82) 100%);
+    }
+
+    /* Top Progress Bar */
+    .progress-track {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: rgba(148, 163, 184, 0.12);
+      z-index: 50;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent-cyan);
+      transition: width 0.55s var(--ease-out-expo);
+      box-shadow: 0 0 12px rgba(34, 211, 238, 0.55);
+    }
+
+    /* Header HUD */
+    .hud-top {
+      position: fixed;
+      top: 18px;
+      left: 32px;
+      right: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 40;
+      pointer-events: none;
+    }
+
+    .brand-mark {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+      color: var(--text-secondary);
+      pointer-events: auto;
+    }
+
+    .brand-mark svg {
+      color: var(--accent-cyan);
+    }
+
+    .hud-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .hud-pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(12, 18, 32, 0.72);
+      color: var(--text-secondary);
+    }
+
+    /* Deck & Slides */
+    .deck {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      perspective: 1400px;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      padding: 72px 64px 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate3d(48px, 0, -60px) rotateY(-3deg);
+      transition:
+        opacity 0.55s var(--ease-out-expo),
+        transform 0.65s var(--ease-out-expo);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(148, 163, 184, 0.25) transparent;
+    }
+
+    .slide.is-prev {
+      transform: translate3d(-48px, 0, -60px) rotateY(3deg);
+    }
+
+    .slide.is-active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate3d(0, 0, 0) rotateY(0deg);
+    }
+
+    .slide-inner {
+      width: 100%;
+      max-width: 1220px;
+      margin: 0 auto;
+    }
+
+    /* Typography */
+    h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.6rem, 5vw, 4.4rem);
+      font-weight: 700;
+      line-height: 1.06;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      max-width: 18ch;
+    }
+
+    h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.75rem, 3vw, 2.5rem);
+      font-weight: 700;
+      line-height: 1.14;
+      letter-spacing: -0.025em;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    h3 {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .lead {
+      font-size: clamp(1.05rem, 1.5vw, 1.25rem);
+      color: var(--text-secondary);
+      max-width: 68ch;
+      line-height: 1.55;
+    }
+
+    .slide-header {
+      margin-bottom: 28px;
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .text-cyan { color: var(--accent-cyan); }
+    .text-indigo { color: var(--accent-indigo); }
+    .text-emerald { color: var(--accent-emerald); }
+    .text-amber { color: var(--accent-amber); }
+    .text-rose { color: var(--accent-rose); }
+
+    /* Surfaces & Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 24px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .panel {
+      background: var(--bg-glass);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 24px;
+      backdrop-filter: blur(12px);
+      transition: transform 0.35s var(--ease-out-expo), border-color 0.35s ease;
+    }
+
+    .panel:hover {
+      border-color: rgba(148, 163, 184, 0.3);
+    }
+
+    .panel-accent-cyan {
+      border-color: rgba(34, 211, 238, 0.32);
+      background: rgba(12, 22, 36, 0.82);
+    }
+
+    .panel-accent-indigo {
+      border-color: rgba(129, 140, 248, 0.32);
+      background: rgba(16, 18, 38, 0.82);
+    }
+
+    .panel-accent-emerald {
+      border-color: rgba(52, 211, 153, 0.32);
+      background: rgba(10, 26, 26, 0.82);
+    }
+
+    .panel-accent-amber {
+      border-color: rgba(251, 191, 36, 0.32);
+      background: rgba(26, 21, 12, 0.82);
+    }
+
+    /* Lists */
+    .clean-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .clean-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      color: var(--text-secondary);
+      font-size: 0.98rem;
+      line-height: 1.5;
+    }
+
+    .clean-list li strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .list-icon {
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+
+    /* Code / Tag Pills */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      padding: 3px 9px;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(19, 28, 49, 0.85);
+      color: var(--text-secondary);
+    }
+
+    .tag-cyan {
+      border-color: rgba(34, 211, 238, 0.35);
+      color: var(--accent-cyan);
+      background: rgba(34, 211, 238, 0.08);
+    }
+
+    .tag-emerald {
+      border-color: rgba(52, 211, 153, 0.35);
+      color: var(--accent-emerald);
+      background: rgba(52, 211, 153, 0.08);
+    }
+
+    .tag-amber {
+      border-color: rgba(251, 191, 36, 0.35);
+      color: var(--accent-amber);
+      background: rgba(251, 191, 36, 0.08);
+    }
+
+    .tag-indigo {
+      border-color: rgba(129, 140, 248, 0.35);
+      color: var(--accent-indigo);
+      background: rgba(129, 140, 248, 0.08);
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.88em;
+      color: var(--accent-cyan);
+      background: rgba(34, 211, 238, 0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Slide 1 Cover Layout */
+    .cover-grid {
+      display: grid;
+      grid-template-columns: 1.35fr 0.85fr;
+      gap: 48px;
+      align-items: center;
+    }
+
+    .cover-meta {
+      margin-top: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .cover-cube-stage {
+      perspective: 900px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 300px;
+    }
+
+    .cube-3d {
+      width: 200px;
+      height: 200px;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: spinCube 18s linear infinite;
+    }
+
+    .cube-face {
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(34, 211, 238, 0.45);
+      background: rgba(12, 18, 32, 0.65);
+      backdrop-filter: blur(6px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--accent-cyan);
+      box-shadow: inset 0 0 28px rgba(34, 211, 238, 0.08);
+    }
+
+    .cube-face span { color: var(--text-secondary); font-size: 0.72rem; }
+    .face-front  { transform: translateZ(100px); }
+    .face-back   { transform: rotateY(180deg) translateZ(100px); }
+    .face-right  { transform: rotateY(90deg) translateZ(100px); border-color: rgba(129, 140, 248, 0.45); color: var(--accent-indigo); }
+    .face-left   { transform: rotateY(-90deg) translateZ(100px); border-color: rgba(52, 211, 153, 0.45); color: var(--accent-emerald); }
+    .face-top    { transform: rotateX(90deg) translateZ(100px); }
+    .face-bottom { transform: rotateX(-90deg) translateZ(100px); }
+
+    @keyframes spinCube {
+      0%   { transform: rotateX(-18deg) rotateY(0deg); }
+      100% { transform: rotateX(-18deg) rotateY(360deg); }
+    }
+
+    /* Slide 3: Interactive 3D Modular Stack */
+    .stack-3d-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 36px;
+      align-items: center;
+    }
+
+    .stack-scene {
+      perspective: 1100px;
+      height: 360px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stack-layers {
+      position: relative;
+      width: 320px;
+      height: 220px;
+      transform-style: preserve-3d;
+      transform: rotateX(54deg) rotateZ(-28deg);
+      transition: transform 0.6s var(--ease-out-expo);
+    }
+
+    .stack-layers.exploded .layer-1 { transform: translateZ(110px); }
+    .stack-layers.exploded .layer-2 { transform: translateZ(20px); }
+    .stack-layers.exploded .layer-3 { transform: translateZ(-70px); }
+
+    .stack-layer {
+      position: absolute;
+      inset: 0;
+      border-radius: 14px;
+      padding: 20px;
+      border: 1.5px solid rgba(148, 163, 184, 0.3);
+      background: rgba(13, 18, 32, 0.9);
+      cursor: pointer;
+      transition: transform 0.55s var(--ease-out-expo), border-color 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .layer-1 { transform: translateZ(75px); border-color: rgba(34, 211, 238, 0.55); box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5); }
+    .layer-2 { transform: translateZ(0px); border-color: rgba(129, 140, 248, 0.55); box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5); }
+    .layer-3 { transform: translateZ(-75px); border-color: rgba(52, 211, 153, 0.55); box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5); }
+
+    .stack-layer.is-selected {
+      box-shadow: 0 24px 48px rgba(34, 211, 238, 0.22);
+      transform: translateZ(130px) scale(1.03) !important;
+    }
+
+    .stack-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-chip {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      padding: 7px 13px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-chip:hover, .btn-chip.is-active {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      background: rgba(34, 211, 238, 0.1);
+    }
+
+    /* Slide 6: Interactive Maker-Checker Flow */
+    .pipeline-steps {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .pipe-node {
+      padding: 14px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      cursor: pointer;
+      transition: all 0.3s var(--ease-out-expo);
+      text-align: left;
+    }
+
+    .pipe-node.is-active {
+      border-color: var(--accent-cyan);
+      background: rgba(34, 211, 238, 0.1);
+      transform: translateY(-4px);
+    }
+
+    .pipe-node .step-num {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .pipe-node.is-active .step-num {
+      color: var(--accent-cyan);
+    }
+
+    .pipe-node .step-title {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .pipe-detail {
+      min-height: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Slide 10: Data Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .data-table th {
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .data-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+      color: var(--text-secondary);
+      vertical-align: top;
+    }
+
+    .data-table td:first-child {
+      font-family: var(--font-mono);
+      color: var(--accent-cyan);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    /* Slide 12: Interactive State Machine */
+    .fsm-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .fsm-state {
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .fsm-state.is-active {
+      border-color: var(--accent-cyan);
+      color: var(--text-primary);
+      background: rgba(34, 211, 238, 0.14);
+      box-shadow: 0 6px 20px rgba(34, 211, 238, 0.15);
+    }
+
+    .fsm-arrow {
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    /* Bottom Navigation Controls */
+    .hud-bottom {
+      position: fixed;
+      bottom: 20px;
+      left: 32px;
+      right: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 40;
+      pointer-events: none;
+    }
+
+    .nav-hint {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .kbd {
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    .btn-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(12, 18, 32, 0.85);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s ease;
+    }
+
+    .btn-icon:hover {
+      border-color: var(--accent-cyan);
+      color: var(--text-primary);
+    }
+
+    .btn-icon:focus-visible, .btn-chip:focus-visible, .pipe-node:focus-visible, .fsm-state:focus-visible {
+      outline: 2px solid var(--accent-cyan);
+      outline-offset: 2px;
+    }
+
+    /* Speaker Notes Drawer */
+    .notes-drawer {
+      position: fixed;
+      bottom: 68px;
+      right: 32px;
+      width: min(440px, calc(100vw - 64px));
+      background: rgba(10, 15, 28, 0.95);
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      padding: 18px 20px;
+      z-index: 60;
+      backdrop-filter: blur(14px);
+      transform: translateY(16px);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s var(--ease-out-expo);
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65);
+    }
+
+    .notes-drawer.is-open {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .notes-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--accent-cyan);
+    }
+
+    .notes-body {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    /* Grid Overview Modal */
+    .overview-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      background: rgba(6, 9, 17, 0.94);
+      backdrop-filter: blur(16px);
+      padding: 64px 48px;
+      overflow-y: auto;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .overview-overlay.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .overview-grid {
+      max-width: 1220px;
+      margin: 24px auto 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .overview-card {
+      padding: 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s ease;
+    }
+
+    .overview-card:hover, .overview-card.is-current {
+      border-color: var(--accent-cyan);
+      background: rgba(34, 211, 238, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .overview-card .ov-num {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent-cyan);
+      margin-bottom: 6px;
+    }
+
+    .overview-card .ov-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Slide 4: Archify-style Interactive Architecture Diagram */
+    .archify-shell {
+      background: rgba(6, 10, 20, 0.88);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 16px 18px 14px;
+      backdrop-filter: blur(12px);
+    }
+
+    .archify-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .archify-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 3px;
+    }
+
+    .archify-svg {
+      width: 100%;
+      height: auto;
+      max-height: 390px;
+      display: block;
+    }
+
+    .arch-node {
+      cursor: pointer;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .arch-node rect.node-box {
+      transition: filter 0.25s ease, stroke-width 0.25s ease;
+    }
+
+    .arch-node:hover rect.node-box,
+    .arch-node.is-selected rect.node-box {
+      filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.35));
+      stroke-width: 2.2;
+    }
+
+    .arch-edge {
+      transition: opacity 0.25s ease, stroke 0.25s ease;
+    }
+
+    .arch-flow-dash {
+      stroke-dasharray: 6 6;
+      animation: dashFlow 1.6s linear infinite;
+    }
+
+    @keyframes dashFlow {
+      to { stroke-dashoffset: -24; }
+    }
+
+    .arch-dimmed {
+      opacity: 0.22 !important;
+    }
+
+    .arch-inspector {
+      margin-top: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(13, 18, 32, 0.9);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 0.88rem;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 960px) {
+      .slide { padding: 68px 24px 80px; }
+      .cover-grid, .stack-3d-layout, .grid-2, .grid-3, .grid-4 {
+        grid-template-columns: 1fr;
+      }
+      .pipeline-steps {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .nav-hint { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg-3d" aria-hidden="true"></canvas>
+  <div class="bg-vignette" aria-hidden="true"></div>
+
+  <div class="progress-track" role="progressbar" aria-valuemin="1" aria-valuemax="14" aria-valuenow="1">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+
+  <header class="hud-top">
+    <div class="brand-mark">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+      <span>TesisHub</span>
+    </div>
+    <div class="hud-meta">
+      <span class="hud-pill" id="section-label">Contexto</span>
+      <span id="slide-counter">01 / 13</span>
+    </div>
+  </header>
+
+  <main class="deck" id="deck">
+    <!-- SLIDE 1: PORTADA -->
+    <section class="slide is-active" data-section="Contexto" data-title="TesisHub: Avances de Implementación" data-notes="Tiempo sugerido: 1 min. Presenta TesisHub como una plataforma que traslada el rigor del flujo Pull Request de Ingeniería de Software a la escritura de tesis en LaTeX, y destaca que hoy veremos tanto la arquitectura del producto como la metodología multi-agente usada para construirlo.">
+      <div class="slide-inner cover-grid">
+        <div>
+          <h1>Pull Requests para la escritura académica</h1>
+          <p class="lead" style="margin-top: 18px;">
+            Avances de implementación de <strong>TesisHub</strong> (Módulo 1: Plataforma) y validación empírica de nuestra metodología de desarrollo <strong>Maker–Checker</strong> con Jira, Git, Docker, Claude Code y Antigravity.
+          </p>
+          <div class="cover-meta">
+            <span class="tag tag-cyan">Jassyr Juárez Vázquez</span>
+            <span class="tag">MIS · FCBIyT / UATx</span>
+            <span class="tag">Noviembre 2026</span>
+          </div>
+        </div>
+        <div class="cover-cube-stage" aria-hidden="true">
+          <div class="cube-3d">
+            <div class="cube-face face-front">TesisHub<span>Módulo 1</span></div>
+            <div class="cube-face face-back">Maker–Checker<span>Claude + Gemini</span></div>
+            <div class="cube-face face-right">Angular 20<span>Spring Boot 3/4</span></div>
+            <div class="cube-face face-left">Jira HUB<span>Git Worktrees</span></div>
+            <div class="cube-face face-top">On-Premise<span>RNF #1</span></div>
+            <div class="cube-face face-bottom">Docker CI<span>Test-Driven</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: PROBLEMA Y PROPUESTA -->
+    <section class="slide" data-section="Contexto" data-title="Del caos de versiones al flujo Pull Request" data-notes="Tiempo sugerido: 1.5 min. Explica rápidamente el dolor cotidiano de los asesores y tesistas (correos, archivos _v3_final) y cómo TesisHub lo resuelve aplicando exactamente los mismos conceptos que enseñamos en Ingeniería de Software.">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <h2>Del caos por correo a la trazabilidad tipo Git</h2>
+          <p class="lead">Reemplazamos el intercambio manual de archivos sueltos por un ciclo formal de <strong>Propuesta de Cambio</strong> auditable de punta a punta.</p>
+        </div>
+        <div class="grid-2">
+          <div class="panel">
+            <h3 class="text-rose">Flujo tradicional (hoy)</h3>
+            <ul class="clean-list" style="margin-top: 14px;">
+              <li>
+                <svg class="list-icon text-rose" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                <span><strong>Versiones sueltas:</strong> <code>Tesis_v3_revisada_final2.tex</code> enviadas por correo sin historial ni diff.</span>
+              </li>
+              <li>
+                <svg class="list-icon text-rose" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                <span><strong>Retroalimentación dispersa:</strong> observaciones en PDFs o mensajes sin anclaje a línea ni estado de resolución.</span>
+              </li>
+              <li>
+                <svg class="list-icon text-rose" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                <span><strong>Riesgo de fuga de datos:</strong> tesistas subiendo borradores inéditos a APIs comerciales de IA.</span>
+              </li>
+            </ul>
+          </div>
+          <div class="panel panel-accent-cyan">
+            <h3 class="text-cyan">Flujo TesisHub (MVP)</h3>
+            <ul class="clean-list" style="margin-top: 14px;">
+              <li>
+                <svg class="list-icon text-cyan" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <span><strong>Espacio de Trabajo:</strong> inicializado desde plantilla institucional LaTeX o archivo <code>.zip</code> validado.</span>
+              </li>
+              <li>
+                <svg class="list-icon text-cyan" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <span><strong>Revisión en 2 etapas:</strong> pre-revisión automática con IA local + dictamen formal del asesor sobre diff línea por línea.</span>
+              </li>
+              <li>
+                <svg class="list-icon text-cyan" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <span><strong>Consolidación segura:</strong> fusión <em>fast-forward only</em> a <code>main</code> tras aprobación y 0 comentarios activos, con compilación PDF.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: ARQUITECTURA DE 3 TESIS (3D INTERACTIVO) -->
+    <section class="slide" data-section="Arquitectura" data-title="Arquitectura Modular de 3 Tesis (3D)" data-notes="Tiempo sugerido: 1.5 min. Usa los botones para separar las capas 3D. Recalca que esta separación por puertos de salida permite defender y probar el Módulo 1 sin depender del avance de los Módulos 2 y 3.">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <h2>Arquitectura desacoplada en tres tesis</h2>
+          <p class="lead">Cada módulo es una tesis independiente; el Módulo 1 consume a los demás mediante puertos de salida intercambiables.</p>
+        </div>
+        <div class="stack-3d-layout">
+          <div class="stack-scene">
+            <div class="stack-layers" id="stack-layers">
+              <div class="stack-layer layer-1 is-selected" data-layer="1">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span class="tag tag-cyan">Módulo 1 · Este proyecto</span>
+                  <span class="mono text-cyan" style="font-size:0.75rem;">Z +75</span>
+                </div>
+                <div>
+                  <h3>Plataforma TesisHub</h3>
+                  <p style="font-size:0.86rem; color:var(--text-secondary);">Angular 20 + Spring Boot + PostgreSQL. Orquesta flujos, usuarios, permisos y estados.</p>
+                </div>
+              </div>
+              <div class="stack-layer layer-2" data-layer="2">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span class="tag tag-indigo">Módulo 2 · Puerto Versioning</span>
+                  <span class="mono text-indigo" style="font-size:0.75rem;">Z 0</span>
+                </div>
+                <div>
+                  <h3>Motor de Versionado</h3>
+                  <p style="font-size:0.86rem; color:var(--text-secondary);">GitLab CE self-hosted. Fuente de verdad para ramas, commits, diffs y merges.</p>
+                </div>
+              </div>
+              <div class="stack-layer layer-3" data-layer="3">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span class="tag tag-emerald">Módulo 3 · Puerto AI Review</span>
+                  <span class="mono text-emerald" style="font-size:0.75rem;">Z -75</span>
+                </div>
+                <div>
+                  <h3>Agente de Revisión IA</h3>
+                  <p style="font-size:0.86rem; color:var(--text-secondary);">Ollama / vLLM (Llama 3, Mistral) on-premise. Comentarios anclados sin estado compartido.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="stack-controls">
+              <button class="btn-chip is-active" id="btn-explode" type="button">Separar capas 3D</button>
+              <button class="btn-chip" data-select-layer="1" type="button">Módulo 1</button>
+              <button class="btn-chip" data-select-layer="2" type="button">Módulo 2</button>
+              <button class="btn-chip" data-select-layer="3" type="button">Módulo 3</button>
+            </div>
+            <div class="panel" id="layer-inspector">
+              <h3 class="text-cyan" id="inspector-title">Módulo 1: Plataforma y Orquestación</h3>
+              <p id="inspector-desc" style="color:var(--text-secondary); margin-top:8px;">
+                Expone la API REST <code>/api/v1</code> y la SPA en Angular. Define puertos de salida (<code>VersioningPort</code>, <code>AiReviewPort</code>) con adaptadores HTTP reales y adaptadores <em>mock</em> deterministas para pruebas aisladas y defensa independiente.
+              </p>
+              <div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;" id="inspector-tags">
+                <span class="tag tag-cyan">Hexagonal</span>
+                <span class="tag">Mock + HTTP Adapters</span>
+                <span class="tag">Rollback transaccional</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: ARQUITECTURA DETALLADA MÓDULO 1 (ESTILO ARCHIFY) -->
+    <section class="slide" data-section="Arquitectura" data-title="Componentes y Comunicación (Módulo 1)" data-notes="Tiempo sugerido: 2 min. Diagrama tipo Archify con todos los componentes del Módulo 1 y cómo se comunican. Haz clic en cualquier nodo (ej. adapters/security, application, VersioningPort) para resaltar sus conexiones y explicar el flujo OIDC, JWT, JPA y puertos hacia Módulos 2 y 3.">
+      <div class="slide-inner">
+        <div class="slide-header" style="margin-bottom:14px;">
+          <h2>Componentes del Módulo 1 y su comunicación</h2>
+          <p class="lead">Flujo completo desde la SPA Angular y Entra ID hasta el núcleo hexagonal, PostgreSQL y los puertos hacia Módulos 2 y 3.</p>
+        </div>
+        <div class="archify-shell">
+          <div class="archify-toolbar">
+            <div class="archify-legend">
+              <span class="legend-item"><span class="legend-dot" style="background:#22d3ee;"></span>Frontend</span>
+              <span class="legend-item"><span class="legend-dot" style="background:#fb7185;"></span>Seguridad</span>
+              <span class="legend-item"><span class="legend-dot" style="background:#34d399;"></span>Backend Hexagonal</span>
+              <span class="legend-item"><span class="legend-dot" style="background:#a78bfa;"></span>Base de Datos</span>
+              <span class="legend-item"><span class="legend-dot" style="background:#94a3b8;"></span>Módulos Externos</span>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn-chip is-active" data-arch-filter="all" type="button">Todo el flujo</button>
+              <button class="btn-chip" data-arch-filter="hex" type="button">Núcleo Hexagonal</button>
+              <button class="btn-chip" data-arch-filter="ports" type="button">Puertos M2 / M3</button>
+            </div>
+          </div>
+
+          <svg class="archify-svg" viewBox="0 0 1120 430" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de arquitectura de componentes del Módulo 1">
+            <defs>
+              <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b"/>
+              </marker>
+              <marker id="arr-cyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#22d3ee"/>
+              </marker>
+              <marker id="arr-emerald" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#34d399"/>
+              </marker>
+            </defs>
+
+            <!-- Boundary: Módulo 1 Backend -->
+            <rect x="275" y="16" width="600" height="398" rx="14" fill="rgba(15,23,42,0.45)" stroke="#334155" stroke-dasharray="6 4"/>
+            <text x="292" y="38" fill="#94a3b8" font-family="JetBrains Mono, monospace" font-size="12" font-weight="600">MÓDULO 1 · BACKEND (tesishub-backend · Spring Boot)</text>
+
+            <!-- Boundary: Hexagonal Core -->
+            <rect x="495" y="138" width="185" height="174" rx="12" fill="rgba(6,78,59,0.16)" stroke="#34d399" stroke-opacity="0.45" stroke-dasharray="4 4"/>
+            <text x="508" y="158" fill="#34d399" font-family="JetBrains Mono, monospace" font-size="10.5">Núcleo sin framework</text>
+
+            <!-- EDGES -->
+            <!-- Frontend -> Entra ID -->
+            <g class="arch-edge" data-from="frontend" data-to="entraid">
+              <path d="M 130 140 L 130 96" stroke="#fb7185" stroke-width="1.6" fill="none" marker-end="url(#arr)"/>
+              <text x="138" y="122" fill="#94a3b8" font-family="JetBrains Mono, monospace" font-size="10">OIDC redirect</text>
+            </g>
+            <!-- Frontend -> adapters/web -->
+            <g class="arch-edge" data-from="frontend" data-to="web">
+              <path d="M 225 180 L 295 180" stroke="#22d3ee" stroke-width="1.8" class="arch-flow-dash" fill="none" marker-end="url(#arr-cyan)"/>
+              <text x="232" y="170" fill="#22d3ee" font-family="JetBrains Mono, monospace" font-size="10">REST /api/v1</text>
+            </g>
+            <!-- Entra ID -> adapters/security -->
+            <g class="arch-edge" data-from="entraid" data-to="security">
+              <path d="M 225 65 L 295 65" stroke="#fb7185" stroke-width="1.6" fill="none" marker-end="url(#arr)"/>
+              <text x="234" y="56" fill="#94a3b8" font-family="JetBrains Mono, monospace" font-size="10">JWKS / JWT</text>
+            </g>
+            <!-- adapters/web -> adapters/security -->
+            <g class="arch-edge" data-from="web" data-to="security">
+              <path d="M 380 148 L 380 112" stroke="#64748b" stroke-width="1.6" fill="none" marker-end="url(#arr)"/>
+              <text x="388" y="133" fill="#94a3b8" font-family="JetBrains Mono, monospace" font-size="10">filtra</text>
+            </g>
+            <!-- adapters/web -> application -->
+            <g class="arch-edge" data-from="web" data-to="application">
+              <path d="M 465 188 L 510 188" stroke="#34d399" stroke-width="1.8" class="arch-flow-dash" fill="none" marker-end="url(#arr-emerald)"/>
+              <text x="469" y="178" fill="#34d399" font-family="JetBrains Mono, monospace" font-size="10">ports/in</text>
+            </g>
+            <!-- adapters/security -> application -->
+            <g class="arch-edge" data-from="security" data-to="application">
+              <path d="M 465 82 L 585 82 L 585 162" stroke="#fb7185" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+              <text x="488" y="74" fill="#94a3b8" font-family="JetBrains Mono, monospace" font-size="10">autoriza RBAC</text>
+            </g>
+            <!-- application -> domain -->
+            <g class="arch-edge" data-from="application" data-to="domain">
+              <path d="M 588 220 L 588 248" stroke="#34d399" stroke-width="1.8" fill="none" marker-end="url(#arr-emerald)"/>
+              <text x="596" y="238" fill="#94a3b8" font-family="JetBrains Mono, monospace" font-size="10">reglas</text>
+            </g>
+            <!-- application -> persistence -->
+            <g class="arch-edge" data-from="application" data-to="persistence">
+              <path d="M 510 205 L 430 205 L 430 330" stroke="#a78bfa" stroke-width="1.6" fill="none" marker-end="url(#arr)"/>
+              <text x="336" y="295" fill="#a78bfa" font-family="JetBrains Mono, monospace" font-size="10">RepositoryPort</text>
+            </g>
+            <!-- persistence -> postgres -->
+            <g class="arch-edge" data-from="persistence" data-to="postgres">
+              <path d="M 295 362 L 225 362" stroke="#a78bfa" stroke-width="1.8" class="arch-flow-dash" fill="none" marker-end="url(#arr)"/>
+              <text x="234" y="352" fill="#a78bfa" font-family="JetBrains Mono, monospace" font-size="10">JPA / SQL</text>
+            </g>
+            <!-- application -> versioning -->
+            <g class="arch-edge" data-from="application" data-to="versioning">
+              <path d="M 665 185 L 705 185 L 705 148 L 718 148" stroke="#34d399" stroke-width="1.6" class="arch-flow-dash" fill="none" marker-end="url(#arr-emerald)"/>
+              <text x="670" y="138" fill="#94a3b8" font-family="JetBrains Mono, monospace" font-size="9.5">VersioningPort</text>
+            </g>
+            <!-- application -> ai -->
+            <g class="arch-edge" data-from="application" data-to="ai">
+              <path d="M 665 202 L 705 202 L 705 288 L 718 288" stroke="#34d399" stroke-width="1.6" class="arch-flow-dash" fill="none" marker-end="url(#arr-emerald)"/>
+              <text x="674" y="278" fill="#94a3b8" font-family="JetBrains Mono, monospace" font-size="9.5">AiReviewPort</text>
+            </g>
+            <!-- versioning -> m2 -->
+            <g class="arch-edge" data-from="versioning" data-to="m2">
+              <path d="M 862 148 L 915 148" stroke="#94a3b8" stroke-width="1.6" stroke-dasharray="4 3" fill="none" marker-end="url(#arr)"/>
+              <text x="867" y="138" fill="#94a3b8" font-family="JetBrains Mono, monospace" font-size="9.5">HTTP/Mock</text>
+            </g>
+            <!-- ai -> m3 -->
+            <g class="arch-edge" data-from="ai" data-to="m3">
+              <path d="M 862 288 L 915 288" stroke="#94a3b8" stroke-width="1.6" stroke-dasharray="4 3" fill="none" marker-end="url(#arr)"/>
+              <text x="867" y="278" fill="#94a3b8" font-family="JetBrains Mono, monospace" font-size="9.5">HTTP/Mock</text>
+            </g>
+
+            <!-- NODES -->
+            <!-- Entra ID -->
+            <g class="arch-node" data-node="entraid">
+              <rect class="node-box" x="35" y="34" width="190" height="62" rx="10" fill="rgba(136,19,55,0.4)" stroke="#fb7185" stroke-width="1.5"/>
+              <text x="50" y="59" fill="#f1f5f9" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="600">Microsoft Entra ID</text>
+              <text x="50" y="79" fill="#fda4af" font-family="JetBrains Mono, monospace" font-size="11">OAuth2 / OIDC SSO</text>
+            </g>
+
+            <!-- Frontend -->
+            <g class="arch-node" data-node="frontend">
+              <rect class="node-box" x="35" y="140" width="190" height="78" rx="10" fill="rgba(8,51,68,0.55)" stroke="#22d3ee" stroke-width="1.5"/>
+              <text x="50" y="166" fill="#f1f5f9" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="600">Frontend SPA</text>
+              <text x="50" y="185" fill="#67e8f9" font-family="JetBrains Mono, monospace" font-size="11">Angular 20 + Signals</text>
+              <text x="50" y="202" fill="#94a3b8" font-family="JetBrains Mono, monospace" font-size="10.5">MSAL + Monaco Diff</text>
+            </g>
+
+            <!-- PostgreSQL -->
+            <g class="arch-node" data-node="postgres">
+              <rect class="node-box" x="35" y="330" width="190" height="64" rx="10" fill="rgba(76,29,149,0.4)" stroke="#a78bfa" stroke-width="1.5"/>
+              <text x="50" y="356" fill="#f1f5f9" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="600">PostgreSQL</text>
+              <text x="50" y="376" fill="#c4b5fd" font-family="JetBrains Mono, monospace" font-size="11">Datos de negocio + Flyway</text>
+            </g>
+
+            <!-- adapters/security -->
+            <g class="arch-node" data-node="security">
+              <rect class="node-box" x="295" y="50" width="170" height="62" rx="10" fill="rgba(136,19,55,0.35)" stroke="#fb7185" stroke-width="1.5"/>
+              <text x="310" y="75" fill="#f1f5f9" font-family="JetBrains Mono, monospace" font-size="12.5" font-weight="600">adapters/security</text>
+              <text x="310" y="95" fill="#fda4af" font-family="JetBrains Mono, monospace" font-size="10.5">Valida JWT + RBAC</text>
+            </g>
+
+            <!-- adapters/web -->
+            <g class="arch-node" data-node="web">
+              <rect class="node-box" x="295" y="148" width="170" height="68" rx="10" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.5"/>
+              <text x="310" y="175" fill="#f1f5f9" font-family="JetBrains Mono, monospace" font-size="12.5" font-weight="600">adapters/web</text>
+              <text x="310" y="195" fill="#6ee7b7" font-family="JetBrains Mono, monospace" font-size="10.5">REST /api/v1 + OpenAPI</text>
+            </g>
+
+            <!-- adapters/persistence -->
+            <g class="arch-node" data-node="persistence">
+              <rect class="node-box" x="295" y="330" width="170" height="64" rx="10" fill="rgba(76,29,149,0.35)" stroke="#a78bfa" stroke-width="1.5"/>
+              <text x="307" y="356" fill="#f1f5f9" font-family="JetBrains Mono, monospace" font-size="11.5" font-weight="600">adapters/persistence</text>
+              <text x="307" y="376" fill="#c4b5fd" font-family="JetBrains Mono, monospace" font-size="10.5">Spring Data JPA Entities</text>
+            </g>
+
+            <!-- application -->
+            <g class="arch-node" data-node="application">
+              <rect class="node-box" x="510" y="164" width="155" height="56" rx="10" fill="rgba(6,78,59,0.55)" stroke="#34d399" stroke-width="1.5"/>
+              <text x="524" y="188" fill="#f1f5f9" font-family="JetBrains Mono, monospace" font-size="12.5" font-weight="600">application</text>
+              <text x="524" y="206" fill="#6ee7b7" font-family="JetBrains Mono, monospace" font-size="10.5">Casos de uso + ZIP</text>
+            </g>
+
+            <!-- domain -->
+            <g class="arch-node" data-node="domain">
+              <rect class="node-box" x="510" y="248" width="155" height="54" rx="10" fill="rgba(6,78,59,0.65)" stroke="#34d399" stroke-width="1.5"/>
+              <text x="524" y="272" fill="#f1f5f9" font-family="JetBrains Mono, monospace" font-size="12.5" font-weight="600">domain</text>
+              <text x="524" y="290" fill="#6ee7b7" font-family="JetBrains Mono, monospace" font-size="10.5">Entidades y FSM</text>
+            </g>
+
+            <!-- VersioningPort adapter -->
+            <g class="arch-node" data-node="versioning">
+              <rect class="node-box" x="718" y="114" width="144" height="68" rx="10" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.5"/>
+              <text x="728" y="139" fill="#f1f5f9" font-family="JetBrains Mono, monospace" font-size="11.5" font-weight="600">VersioningPort</text>
+              <text x="728" y="157" fill="#6ee7b7" font-family="JetBrains Mono, monospace" font-size="10">adaptador mock /</text>
+              <text x="728" y="171" fill="#6ee7b7" font-family="JetBrains Mono, monospace" font-size="10">cliente HTTP</text>
+            </g>
+
+            <!-- AiReviewPort adapter -->
+            <g class="arch-node" data-node="ai">
+              <rect class="node-box" x="718" y="254" width="144" height="68" rx="10" fill="rgba(6,78,59,0.4)" stroke="#34d399" stroke-width="1.5"/>
+              <text x="728" y="279" fill="#f1f5f9" font-family="JetBrains Mono, monospace" font-size="11.5" font-weight="600">AiReviewPort</text>
+              <text x="728" y="297" fill="#6ee7b7" font-family="JetBrains Mono, monospace" font-size="10">adaptador mock /</text>
+              <text x="728" y="311" fill="#6ee7b7" font-family="JetBrains Mono, monospace" font-size="10">cliente HTTP</text>
+            </g>
+
+            <!-- Módulo 2 -->
+            <g class="arch-node" data-node="m2">
+              <rect class="node-box" x="915" y="114" width="175" height="68" rx="10" fill="rgba(30,41,59,0.65)" stroke="#94a3b8" stroke-width="1.5"/>
+              <text x="929" y="140" fill="#f1f5f9" font-family="Space Grotesk, sans-serif" font-size="13.5" font-weight="600">Módulo 2 · Git</text>
+              <text x="929" y="159" fill="#cbd5e1" font-family="JetBrains Mono, monospace" font-size="10.5">GitLab CE + MDX</text>
+              <text x="929" y="173" fill="#94a3b8" font-family="JetBrains Mono, monospace" font-size="10">Tesis independiente</text>
+            </g>
+
+            <!-- Módulo 3 -->
+            <g class="arch-node" data-node="m3">
+              <rect class="node-box" x="915" y="254" width="175" height="68" rx="10" fill="rgba(30,41,59,0.65)" stroke="#94a3b8" stroke-width="1.5"/>
+              <text x="929" y="280" fill="#f1f5f9" font-family="Space Grotesk, sans-serif" font-size="13.5" font-weight="600">Módulo 3 · IA</text>
+              <text x="929" y="299" fill="#cbd5e1" font-family="JetBrains Mono, monospace" font-size="10.5">Ollama / vLLM</text>
+              <text x="929" y="313" fill="#94a3b8" font-family="JetBrains Mono, monospace" font-size="10">Inferencia on-premise</text>
+            </g>
+          </svg>
+
+          <div class="arch-inspector" id="arch-inspector">
+            <div>
+              <strong class="text-cyan" id="arch-ins-title">Haz clic en cualquier componente para inspeccionar sus conexiones</strong>
+              <span id="arch-ins-desc" style="color:var(--text-secondary); margin-left:8px;">
+                Pureza hexagonal verificada automáticamente con ArchUnit (<code>HexagonalArchitectureTest</code>).
+              </span>
+            </div>
+            <span class="tag tag-emerald" id="arch-ins-tag">ArchUnit Verified</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: STACK Y SOBERANÍA -->
+    <section class="slide" data-section="Arquitectura" data-title="Stack Técnico y Soberanía de Datos" data-notes="Tiempo sugerido: 1.5 min. Destaca el cumplimiento estricto de RNF #1 (soberanía de datos on-premise), el contrato OpenAPI como fuente única de verdad entre backend y frontend, y la seguridad con MSAL Entra ID + RBAC en backend.">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <h2>Stack técnico y soberanía de datos</h2>
+          <p class="lead">Arquitectura hexagonal en backend, tipado estricto en frontend desde OpenAPI y ejecución 100% <em>on-premise</em>.</p>
+        </div>
+        <div class="grid-3">
+          <div class="panel panel-accent-cyan">
+            <h3>Backend</h3>
+            <p class="mono text-cyan" style="font-size:0.82rem; margin-bottom:12px;">tesishub-backend</p>
+            <ul class="clean-list">
+              <li><span><strong>Java 21 + Spring Boot</strong> en arquitectura hexagonal pura (dominio sin dependencias de framework).</span></li>
+              <li><span><strong>PostgreSQL + Flyway:</strong> migraciones versionadas (<code>V1..V10</code>) y datos semilla reproducibles.</span></li>
+              <li><span><strong>Seguridad:</strong> validación JWT Entra ID y RBAC aplicado en servidor, no solo en rutas UI.</span></li>
+            </ul>
+          </div>
+          <div class="panel panel-accent-indigo">
+            <h3>Frontend</h3>
+            <p class="mono text-indigo" style="font-size:0.82rem; margin-bottom:12px;">tesishub-frontend</p>
+            <ul class="clean-list">
+              <li><span><strong>Angular 20 SPA:</strong> Standalone Components, Signals reactivos y MSAL Angular para SSO.</span></li>
+              <li><span><strong>Contrato OpenAPI:</strong> tipos y clientes generados con <code>openapi-typescript</code> (cero desfase con API).</span></li>
+              <li><span><strong>Visor / Diff:</strong> Monaco Editor para archivos <code>.tex</code> y anclaje de comentarios por línea.</span></li>
+            </ul>
+          </div>
+          <div class="panel panel-accent-emerald">
+            <h3>Soberanía (RNF #1)</h3>
+            <p class="mono text-emerald" style="font-size:0.82rem; margin-bottom:12px;">Infraestructura UATx</p>
+            <ul class="clean-list">
+              <li><span><strong>Cero fuga a la nube:</strong> ningún borrador de tesis sale a APIs comerciales externas.</span></li>
+              <li><span><strong>IA Local:</strong> inferencia vía Ollama / vLLM dentro de la red universitaria, sin estado entre proyectos.</span></li>
+              <li><span><strong>Contenedores:</strong> despliegue reproducible con <code>tesishub-infra</code> y Docker Compose.</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: METODOLOGÍA MAKER-CHECKER -->
+    <section class="slide" data-section="Metodología" data-title="Orquestación Multi-Agente Maker–Checker" data-notes="Tiempo sugerido: 1.5 min. Aquí entramos al corazón metodológico para los profesores de Ing. de Software: por qué no usamos un solo agente (sesgo de confirmación) y cómo separamos generación vs. auditoría.">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <h2>Metodología Multi-Agente Maker–Checker</h2>
+          <p class="lead">Separar quién escribe el código de quién lo audita elimina el sesgo de confirmación del LLM.</p>
+        </div>
+        <div class="grid-2">
+          <div class="panel panel-accent-indigo">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <h3>Maker: Claude Code CLI</h3>
+              <span class="tag tag-indigo">Generador</span>
+            </div>
+            <ul class="clean-list">
+              <li><span>Invocado en modo <em>headless</em> no interactivo (<code>claude -p</code>) por historia de usuario.</span></li>
+              <li><span>Lee directivas estrictas en <code>CLAUDE.md</code> y <code>AGENTS.md</code> del repositorio.</span></li>
+              <li><span>Implementa código, migraciones y pruebas; ejecuta el CI local antes de abrir el Pull Request.</span></li>
+              <li><span>Atiende hallazgos bloqueantes en ciclos iterativos hasta lograr aprobación.</span></li>
+            </ul>
+          </div>
+          <div class="panel panel-accent-cyan">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <h3>Checker: Antigravity (Gemini)</h3>
+              <span class="tag tag-cyan">Auditor Empírico</span>
+            </div>
+            <ul class="clean-list">
+              <li><span>Subagentes efímeros con contexto 100% limpio por cada ronda de auditoría (<code>pr-audit</code>).</span></li>
+              <li><span>Verifica criterios de aceptación de Jira, arquitectura hexagonal y reusabilidad.</span></li>
+              <li><span><strong>Regla de oro:</strong> prohibido reportar bugs por intuición; todo defecto debe reproducirse con un test que falle.</span></li>
+              <li><span>Convergencia pragmática: máximo 3 rondas; aprueba automático si solo quedan <code>NIT</code> menores.</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 7: JIRA BLACKBOARD & AGENTES EN ACCIÓN (DIAGRAMA UNIFICADO) -->
+    <section class="slide" data-section="Metodología" data-title="Jira como Pizarra Determinista (Blackboard)" data-notes="Tiempo sugerido: 2 min. Vista completa de los agentes trabajando en paralelo sobre la pizarra de Jira. Usa los botones superiores para resaltar la Fase Maker, la Fase Checker o el Bucle de Corrección sin cambiar de pantalla.">
+      <div class="slide-inner">
+        <div class="slide-header" style="margin-bottom:14px;">
+          <h2>Jira como pizarra determinista (<em>Blackboard</em>)</h2>
+          <p class="lead">Los agentes se coordinan en una sola arquitectura cerrada: Jira gobierna los estados, GitHub valida y los worktrees aíslan el trabajo.</p>
+        </div>
+
+        <div class="archify-shell">
+          <div class="archify-toolbar">
+            <div class="archify-legend">
+              <span class="legend-item"><span class="legend-dot" style="background:#22d3ee;"></span>Jira Blackboard</span>
+              <span class="legend-item"><span class="legend-dot" style="background:#818cf8;"></span>Maker (Claude Code)</span>
+              <span class="legend-item"><span class="legend-dot" style="background:#34d399;"></span>Checker (Antigravity)</span>
+              <span class="legend-item"><span class="legend-dot" style="background:#fbbf24;"></span>GitHub PR / CI</span>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-chip is-active" data-bb-phase="all" type="button">Ciclo completo</button>
+              <button class="btn-chip" data-bb-phase="maker" type="button">1. Fase Maker</button>
+              <button class="btn-chip" data-bb-phase="checker" type="button">2. Fase Checker</button>
+              <button class="btn-chip" data-bb-phase="fix" type="button">3. Bucle Fix</button>
+            </div>
+          </div>
+
+          <svg class="archify-svg" viewBox="0 0 1120 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de coordinación Blackboard entre Jira, Claude Code, GitHub y Antigravity">
+            <defs>
+              <marker id="bb-arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b"/>
+              </marker>
+              <marker id="bb-arr-cyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#22d3ee"/>
+              </marker>
+              <marker id="bb-arr-indigo" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#818cf8"/>
+              </marker>
+              <marker id="bb-arr-emerald" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#34d399"/>
+              </marker>
+              <marker id="bb-arr-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#fbbf24"/>
+              </marker>
+            </defs>
+
+            <!-- TOP ZONE: JIRA BLACKBOARD -->
+            <rect x="24" y="14" width="1072" height="142" rx="14" fill="rgba(8,51,68,0.22)" stroke="#22d3ee" stroke-opacity="0.45" stroke-dasharray="6 4"/>
+            <text x="44" y="38" fill="#22d3ee" font-family="JetBrains Mono, monospace" font-size="12" font-weight="600">PIZARRA DE COORDINACIÓN · JIRA CLOUD (PROYECTO HUB · MCP ATLASSIAN)</text>
+
+            <!-- Jira States -->
+            <g class="bb-item" data-phase="all maker">
+              <rect x="44" y="56" width="145" height="52" rx="8" fill="rgba(15,23,42,0.85)" stroke="#64748b" stroke-width="1.4"/>
+              <text x="60" y="79" fill="#f1f5f9" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="600">Por hacer</text>
+              <text x="60" y="97" fill="#94a3b8" font-family="JetBrains Mono, monospace" font-size="10.5">transition: 11</text>
+            </g>
+
+            <path class="bb-item arch-flow-dash" data-phase="all maker" d="M 189 82 L 236 82" stroke="#818cf8" stroke-width="1.8" fill="none" marker-end="url(#bb-arr-indigo)"/>
+
+            <g class="bb-item" data-phase="all maker fix">
+              <rect x="240" y="56" width="160" height="52" rx="8" fill="rgba(49,46,129,0.45)" stroke="#818cf8" stroke-width="1.6"/>
+              <text x="256" y="79" fill="#f1f5f9" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="600">En curso</text>
+              <text x="256" y="97" fill="#c7d2fe" font-family="JetBrains Mono, monospace" font-size="10.5">transition: 21</text>
+            </g>
+
+            <path class="bb-item arch-flow-dash" data-phase="all maker fix" d="M 400 82 L 456 82" stroke="#22d3ee" stroke-width="1.8" fill="none" marker-end="url(#bb-arr-cyan)"/>
+
+            <g class="bb-item" data-phase="all maker checker fix">
+              <rect x="460" y="56" width="170" height="52" rx="8" fill="rgba(8,51,68,0.65)" stroke="#22d3ee" stroke-width="1.6"/>
+              <text x="476" y="79" fill="#f1f5f9" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="600">En revisión</text>
+              <text x="476" y="97" fill="#67e8f9" font-family="JetBrains Mono, monospace" font-size="10.5">transition: 31</text>
+            </g>
+
+            <path class="bb-item arch-flow-dash" data-phase="all checker" d="M 630 82 L 686 82" stroke="#34d399" stroke-width="1.8" fill="none" marker-end="url(#bb-arr-emerald)"/>
+
+            <g class="bb-item" data-phase="all checker">
+              <rect x="690" y="56" width="165" height="52" rx="8" fill="rgba(6,78,59,0.5)" stroke="#34d399" stroke-width="1.6"/>
+              <text x="706" y="79" fill="#f1f5f9" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="600">Aprobada</text>
+              <text x="706" y="97" fill="#6ee7b7" font-family="JetBrains Mono, monospace" font-size="10.5">transition: 3</text>
+            </g>
+
+            <path class="bb-item arch-flow-dash" data-phase="all checker" d="M 855 82 L 906 82" stroke="#34d399" stroke-width="1.8" fill="none" marker-end="url(#bb-arr-emerald)"/>
+
+            <g class="bb-item" data-phase="all checker">
+              <rect x="910" y="56" width="165" height="52" rx="8" fill="rgba(6,78,59,0.72)" stroke="#34d399" stroke-width="1.8"/>
+              <text x="926" y="79" fill="#f1f5f9" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="600">Finalizado</text>
+              <text x="926" y="97" fill="#6ee7b7" font-family="JetBrains Mono, monospace" font-size="10.5">transition: 41</text>
+            </g>
+
+            <!-- Feedback loop in Jira: En revisión -> Cambios solicitados -> En curso -->
+            <g class="bb-item" data-phase="all fix">
+              <path d="M 545 108 L 545 136 L 320 136 L 320 112" stroke="#fbbf24" stroke-width="1.6" stroke-dasharray="5 4" fill="none" marker-end="url(#bb-arr-amber)"/>
+              <rect x="355" y="122" width="168" height="24" rx="6" fill="rgba(120,53,15,0.85)" stroke="#fbbf24" stroke-width="1.2"/>
+              <text x="366" y="138" fill="#fde68a" font-family="JetBrains Mono, monospace" font-size="10.5">Cambios solicitados (2)</text>
+            </g>
+
+            <!-- VERTICAL ARROWS: JIRA <-> AGENTS -->
+            <!-- Maker reads/updates En curso -->
+            <g class="bb-item" data-phase="all maker fix">
+              <path d="M 275 108 L 275 210" stroke="#818cf8" stroke-width="1.8" class="arch-flow-dash" fill="none" marker-end="url(#bb-arr-indigo)"/>
+              <text x="160" y="185" fill="#c7d2fe" font-family="JetBrains Mono, monospace" font-size="10">lee ticket + estado 21</text>
+            </g>
+
+            <!-- Maker triggers En revisión -->
+            <g class="bb-item" data-phase="all maker fix">
+              <path d="M 355 212 L 495 112" stroke="#22d3ee" stroke-width="1.6" fill="none" marker-end="url(#bb-arr-cyan)"/>
+              <text x="418" y="185" fill="#67e8f9" font-family="JetBrains Mono, monospace" font-size="10">PR → estado 31</text>
+            </g>
+
+            <!-- Checker reads En revisión & updates Aprobada / Finalizado -->
+            <g class="bb-item" data-phase="all checker fix">
+              <path d="M 595 108 L 765 210" stroke="#34d399" stroke-width="1.8" class="arch-flow-dash" fill="none" marker-end="url(#bb-arr-emerald)"/>
+              <text x="645" y="185" fill="#6ee7b7" font-family="JetBrains Mono, monospace" font-size="10">despierta Checker</text>
+            </g>
+
+            <g class="bb-item" data-phase="all checker">
+              <path d="M 945 212 L 945 112" stroke="#34d399" stroke-width="1.8" fill="none" marker-end="url(#bb-arr-emerald)"/>
+              <text x="955" y="185" fill="#6ee7b7" font-family="JetBrains Mono, monospace" font-size="10">merge → estado 41</text>
+            </g>
+
+            <!-- BOTTOM ZONE: AGENTS & GITHUB -->
+            <!-- MAKER NODE -->
+            <g class="bb-item" data-phase="all maker fix">
+              <rect x="24" y="214" width="350" height="190" rx="14" fill="rgba(49,46,129,0.32)" stroke="#818cf8" stroke-width="1.8"/>
+              <text x="44" y="242" fill="#f1f5f9" font-family="Space Grotesk, sans-serif" font-size="16" font-weight="700">Maker: Claude Code CLI</text>
+              <text x="44" y="262" fill="#c7d2fe" font-family="JetBrains Mono, monospace" font-size="11">modo headless (claude -p) · AGENTS.md</text>
+              <rect x="44" y="278" width="310" height="32" rx="7" fill="rgba(15,23,42,0.8)" stroke="#475569"/>
+              <text x="56" y="298" fill="#cbd5e1" font-family="JetBrains Mono, monospace" font-size="11">Worktree: tesishub-backend/ &amp; frontend/</text>
+              <rect x="44" y="318" width="310" height="32" rx="7" fill="rgba(15,23,42,0.8)" stroke="#475569"/>
+              <text x="56" y="338" fill="#cbd5e1" font-family="JetBrains Mono, monospace" font-size="11">CI local: spotless · verify · jest · e2e</text>
+              <rect x="44" y="358" width="310" height="32" rx="7" fill="rgba(15,23,42,0.8)" stroke="#818cf8" stroke-opacity="0.5"/>
+              <text x="56" y="378" fill="#c7d2fe" font-family="JetBrains Mono, monospace" font-size="11">Incorpora @Test del Checker y corrige</text>
+            </g>
+
+            <!-- Maker -> GitHub -->
+            <g class="bb-item" data-phase="all maker fix">
+              <path d="M 374 308 L 436 308" stroke="#fbbf24" stroke-width="2" class="arch-flow-dash" fill="none" marker-end="url(#bb-arr-amber)"/>
+              <text x="380" y="296" fill="#fde68a" font-family="JetBrains Mono, monospace" font-size="10">gh pr</text>
+            </g>
+
+            <!-- GITHUB HUB -->
+            <g class="bb-item" data-phase="all maker checker fix">
+              <rect x="440" y="232" width="235" height="154" rx="14" fill="rgba(120,53,15,0.28)" stroke="#fbbf24" stroke-width="1.6"/>
+              <text x="460" y="260" fill="#f1f5f9" font-family="Space Grotesk, sans-serif" font-size="15.5" font-weight="700">GitHub PR + Actions</text>
+              <text x="460" y="280" fill="#fde68a" font-family="JetBrains Mono, monospace" font-size="11">Artefacto compartido</text>
+              <text x="460" y="308" fill="#cbd5e1" font-family="Inter, sans-serif" font-size="12.5">• Diff y checks remotos</text>
+              <text x="460" y="330" fill="#cbd5e1" font-family="Inter, sans-serif" font-size="12.5">• Hallazgos duales (PR + Jira)</text>
+              <text x="460" y="352" fill="#cbd5e1" font-family="Inter, sans-serif" font-size="12.5">• Merge protegido a develop</text>
+            </g>
+
+            <!-- GitHub <-> Checker -->
+            <g class="bb-item" data-phase="all checker fix">
+              <path d="M 675 308 L 736 308" stroke="#34d399" stroke-width="2" class="arch-flow-dash" fill="none" marker-end="url(#bb-arr-emerald)"/>
+              <text x="681" y="296" fill="#6ee7b7" font-family="JetBrains Mono, monospace" font-size="10">audita</text>
+            </g>
+
+            <!-- CHECKER NODE -->
+            <g class="bb-item" data-phase="all checker fix">
+              <rect x="740" y="214" width="356" height="190" rx="14" fill="rgba(6,78,59,0.34)" stroke="#34d399" stroke-width="1.8"/>
+              <text x="760" y="242" fill="#f1f5f9" font-family="Space Grotesk, sans-serif" font-size="16" font-weight="700">Checker: Antigravity Gemini</text>
+              <text x="760" y="262" fill="#6ee7b7" font-family="JetBrains Mono, monospace" font-size="11">subagente efímero limpio · skill pr-audit</text>
+              <rect x="760" y="278" width="316" height="32" rx="7" fill="rgba(15,23,42,0.8)" stroke="#475569"/>
+              <text x="772" y="298" fill="#cbd5e1" font-family="JetBrains Mono, monospace" font-size="11">Worktree aislado: *-audit/ (HEAD detached)</text>
+              <rect x="760" y="318" width="316" height="32" rx="7" fill="rgba(15,23,42,0.8)" stroke="#475569"/>
+              <text x="772" y="338" fill="#cbd5e1" font-family="JetBrains Mono, monospace" font-size="11">Reproduce bugs con @Test / spec.ts</text>
+              <rect x="760" y="358" width="316" height="32" rx="7" fill="rgba(15,23,42,0.8)" stroke="#34d399" stroke-opacity="0.5"/>
+              <text x="772" y="378" fill="#6ee7b7" font-family="JetBrains Mono, monospace" font-size="11">Máx. 3 rondas · 0% falsos positivos</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 8: GIT WORKTREES & ISOLATION -->
+    <section class="slide" data-section="Metodología" data-title="Aislamiento con Git Worktrees y Junctions" data-notes="Tiempo sugerido: 1.5 min. Explica la ingeniería práctica detrás del entorno: cómo evitar que Maker, Checker y el IDE del humano se pisen los archivos o colapsen OneDrive.">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <h2>Aislamiento físico con Git Worktrees</h2>
+          <p class="lead">Tres árboles de trabajo independientes compartiendo un mismo objeto Git, sin colisiones ni sincronización con OneDrive.</p>
+        </div>
+        <div class="grid-3">
+          <div class="panel panel-accent-indigo">
+            <span class="tag tag-indigo">Maker</span>
+            <h3 style="margin-top:12px;"><code>tesishub-backend/</code><br/><code>tesishub-frontend/</code></h3>
+            <p style="color:var(--text-secondary); font-size:0.92rem; margin-top:8px;">
+              Espacio exclusivo donde Claude Code crea ramas de feature, aplica formato y ejecuta compilaciones locales.
+            </p>
+          </div>
+          <div class="panel panel-accent-cyan">
+            <span class="tag tag-cyan">Checker (Audit)</span>
+            <h3 style="margin-top:12px;"><code>*-audit/</code></h3>
+            <p style="color:var(--text-secondary); font-size:0.92rem; margin-top:8px;">
+              Worktree en <code>HEAD detached</code> sobre <code>origin/develop</code>. El Checker hace checkout del PR aquí y ejecuta tests destructivos sin tocar al Maker.
+            </p>
+          </div>
+          <div class="panel panel-accent-emerald">
+            <span class="tag tag-emerald">Humano (IDE)</span>
+            <h3 style="margin-top:12px;"><code>*-ide/</code></h3>
+            <p style="color:var(--text-secondary); font-size:0.92rem; margin-top:8px;">
+              Rama <code>ide/develop</code> para depurar en IntelliJ / VS Code en cualquier momento sin interrumpir a los agentes.
+            </p>
+          </div>
+        </div>
+        <div class="panel" style="margin-top:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+          <div>
+            <h3>Redirección de I/O fuera de OneDrive (NTFS Junctions)</h3>
+            <p style="color:var(--text-secondary); font-size:0.92rem;">
+              Los directorios pesados (<code>target</code>, <code>.angular</code>, <code>dist</code>, <code>coverage</code>, <code>node_modules</code>) apuntan a <code>C:\DevTargets\...</code>, evitando bloqueos de sincronización y acelerando compilaciones.
+            </p>
+          </div>
+          <span class="tag tag-amber">Lección: prohibido mvnw clean sobre junctions</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 8: AUDITORÍA EMPÍRICA -->
+    <section class="slide" data-section="Calidad" data-title="Auditoría Empírica Guiada por Pruebas" data-notes="Tiempo sugerido: 1.5 min. Destaca cómo combatimos las alucinaciones de revisión de código: ningún comentario de bug es válido sin un test que lo reproduzca fallando.">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <h2>Auditoría empírica guiada por pruebas</h2>
+          <p class="lead"><em>"Ningún bug se reporta sin una prueba ejecutable que falle"</em> — eliminamos las alucinaciones en code review.</p>
+        </div>
+        <div class="grid-2">
+          <div class="panel">
+            <h3>Clasificación estricta de hallazgos</h3>
+            <ul class="clean-list" style="margin-top:14px;">
+              <li><span class="tag" style="border-color:rgba(251,113,133,0.45); color:var(--accent-rose);">BUG_CONFIRMADO</span><span>Bloqueante. Incluye código <code>@Test</code> o <code>spec.ts</code> que falla reproduciendo el defecto.</span></li>
+              <li><span class="tag tag-amber">AC / ARQUITECTURA</span><span>Bloqueante. Violación de criterio de aceptación en Jira o de capas hexagonales.</span></li>
+              <li><span class="tag tag-amber">CALIDAD / REUSO</span><span>Bloqueante. Duplicación, complejidad excesiva o falta de cobertura.</span></li>
+              <li><span class="tag tag-emerald">NIT</span><span>No bloqueante. Sugerencias menores de estilo; si solo quedan NITs, el PR se aprueba.</span></li>
+            </ul>
+          </div>
+          <div class="panel panel-accent-cyan">
+            <h3>Flujo de verificación en <code>pr-audit</code></h3>
+            <ul class="clean-list" style="margin-top:14px;">
+              <li><span><strong>1.</strong> Si el Checker sospecha un bug, escribe la prueba en su worktree <code>*-audit</code> y la ejecuta.</span></li>
+              <li><span><strong>2.</strong> Si la prueba pasa en verde → era un falso positivo; se descarta sin ruido en el PR.</span></li>
+              <li><span><strong>3.</strong> Si falla → se publica el hallazgo con el código del test en GitHub PR y en Jira.</span></li>
+              <li><span><strong>4.</strong> El Maker incorpora ese mismo test a la suite oficial y corrige el código hasta ponerlo en verde.</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 9: DOCKER Y CI GATES -->
+    <section class="slide" data-section="Calidad" data-title="Infraestructura Docker y Gates de Calidad" data-notes="Tiempo sugerido: 1.5 min. Muestra el rigor de automatización: Docker Compose para pruebas de caja negra con Fake Entra ID, y los gates exactos que bloquean cualquier merge.">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <h2>Infraestructura Docker y gates obligatorios</h2>
+          <p class="lead">Cada PR debe superar la pirámide completa de pruebas en local y en GitHub Actions antes de ser auditado.</p>
+        </div>
+        <div class="grid-2">
+          <div class="panel panel-accent-cyan">
+            <h3>Pirámide de pruebas (5 niveles)</h3>
+            <ul class="clean-list" style="margin-top:14px;">
+              <li><span><strong>Nivel 1–2 (Backend):</strong> Unitarias JUnit 5 + Integración MockMvc / Testcontainers PostgreSQL + JaCoCo <code>&ge; 80%</code> + Spotless.</span></li>
+              <li><span><strong>Nivel 3 (Frontend):</strong> Jest unitarias (<code>&gt; 99%</code> statements) + validación de contrato OpenAPI (<code>api:check</code>).</span></li>
+              <li><span><strong>Nivel 4 (Caja negra HTTP):</strong> REST Assured contra contenedor Docker (<code>docker-compose.api-tests.yml</code>) + emisor sintético <strong>Fake Entra ID</strong> (<code>HUB-83</code>).</span></li>
+              <li><span><strong>Nivel 5 (E2E + A11y):</strong> Playwright en Chromium + auditoría automática de accesibilidad con <strong>Axe</strong> (0 violaciones).</span></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h3>Comandos Gate por repositorio</h3>
+            <div style="margin-top:14px; display:flex; flex-direction:column; gap:14px;">
+              <div>
+                <span class="tag tag-cyan">tesishub-backend</span>
+                <p class="mono" style="font-size:0.82rem; color:var(--text-secondary); margin-top:6px;">./mvnw spotless:apply && ./mvnw verify</p>
+              </div>
+              <div>
+                <span class="tag tag-indigo">tesishub-frontend</span>
+                <p class="mono" style="font-size:0.8rem; color:var(--text-secondary); margin-top:6px;">npm run api:check && npm run typecheck && npm run lint && ng build && npm run test:coverage && npm run test:e2e</p>
+              </div>
+              <div>
+                <span class="tag tag-emerald">tesishub-infra</span>
+                <p class="mono" style="font-size:0.82rem; color:var(--text-secondary); margin-top:6px;">docker compose -f &lt;file&gt; config --quiet</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 10: AVANCES Y MÉTRICAS REALES -->
+    <section class="slide" data-section="Avances" data-title="Métricas Reales: Sprint Experimental y Sprint 3" data-notes="Tiempo sugerido: 2 min. Presenta los números verificados de ambos reportes de sprint. Destaca el 100% de cierre, el promedio de 1.16 rondas por PR, 0% falsos positivos, y el crecimiento de la suite de pruebas.">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <h2>Avances comprobados en Sprint Experimental y Sprint 3</h2>
+          <p class="lead">12 de 12 historias completadas y fusionadas a <code>develop</code> con 100% de pipelines en verde.</p>
+        </div>
+        <div class="grid-4" style="margin-bottom:20px;">
+          <div class="panel panel-accent-cyan">
+            <div class="mono text-cyan" style="font-size:2rem; font-weight:700;">12 / 12</div>
+            <div style="font-size:0.88rem; color:var(--text-secondary); margin-top:4px;">Historias completadas (5 Exp + 7 Sprint 3)</div>
+          </div>
+          <div class="panel panel-accent-emerald">
+            <div class="mono text-emerald" style="font-size:2rem; font-weight:700;">363 + 273</div>
+            <div style="font-size:0.88rem; color:var(--text-secondary); margin-top:4px;">Tests Backend (Unit + Integración / 89 HTTP)</div>
+          </div>
+          <div class="panel panel-accent-indigo">
+            <div class="mono text-indigo" style="font-size:2rem; font-weight:700;">285 + 41</div>
+            <div style="font-size:0.88rem; color:var(--text-secondary); margin-top:4px;">Tests Frontend (99.17% Jest + Playwright E2E)</div>
+          </div>
+          <div class="panel panel-accent-amber">
+            <div class="mono text-amber" style="font-size:2rem; font-weight:700;">0%</div>
+            <div style="font-size:0.88rem; color:var(--text-secondary); margin-top:4px;">Falsos positivos reportados en auditorías</div>
+          </div>
+        </div>
+        <div class="panel" style="padding:16px 20px;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Ticket</th>
+                <th>Repo</th>
+                <th>Entregable clave (Sprint 3 · CU-01 End-to-End)</th>
+                <th>Rondas</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>HUB-67 / 87</td>
+                <td>Backend</td>
+                <td>Plantillas institucionales, validador ZIP (<code>RV-01..08</code>) y corpus de 34 archivos</td>
+                <td>1 / 2</td>
+              </tr>
+              <tr>
+                <td>HUB-43</td>
+                <td>Backend</td>
+                <td>5 endpoints de Proyectos (CU-01), migración Flyway <code>V10</code> y rollback con <code>VersioningPort</code></td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td>HUB-83 / 84</td>
+                <td>BE / Infra</td>
+                <td>Fake Entra ID en Docker + Suite HTTP REST Assured (89 tests caja negra)</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td>HUB-85 / 53</td>
+                <td>Frontend</td>
+                <td>Fixtures OpenAPI, UI <code>ProjectList</code> / <code>ProjectForm</code>, 0 violaciones Axe</td>
+                <td>1</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 11: HALLAZGOS EMPÍRICOS -->
+    <section class="slide" data-section="Avances" data-title="Bugs Críticos Interceptados antes de develop" data-notes="Tiempo sugerido: 1.5 min. Esta slide suele impresionar mucho a profesores de Ing. de Software: casos concretos donde el Checker escribió tests reales que atraparon vulnerabilidades de seguridad y corrupción de datos.">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <h2>Hallazgos críticos interceptados antes de <code>develop</code></h2>
+          <p class="lead">Casos reales donde la auditoría guiada por pruebas bloqueó defectos que habrían pasado una revisión superficial.</p>
+        </div>
+        <div class="grid-2">
+          <div class="panel panel-accent-amber">
+            <span class="tag tag-amber">HUB-87 · Seguridad ZIP</span>
+            <h3 style="margin-top:12px;">Desbordamiento 64-bit en <code>ZIP64</code></h3>
+            <p style="color:var(--text-secondary); font-size:0.94rem; margin-top:8px;">
+              Entradas <code>ZIP64</code> con tamaños combinados mayores a <code>Long.MAX_VALUE</code> hacían <em>wrap-around</em> a negativos, burlando la defensa contra bombas de compresión (<code>RV-08</code>).
+            </p>
+            <p class="mono text-cyan" style="font-size:0.78rem; margin-top:12px;">
+              Test: rv08RejectsZip64DeclaredSizesWhoseSumOverflowsLong
+            </p>
+          </div>
+          <div class="panel panel-accent-amber">
+            <span class="tag tag-amber">HUB-87 · Integridad Stream</span>
+            <h3 style="margin-top:12px;">Entradas omitidas en <code>ZipInputStream</code></h3>
+            <p style="color:var(--text-secondary); font-size:0.94rem; margin-top:8px;">
+              Un archivo ZIP cuyo directorio central declaraba entradas ausentes en la secuencia de headers locales lograba evadir la validación estándar.
+            </p>
+            <p class="mono text-cyan" style="font-size:0.78rem; margin-top:12px;">
+              Test: rv01RejectsAZipWhoseDirectoryListsEntriesMissingFromTheStream
+            </p>
+          </div>
+          <div class="panel">
+            <span class="tag tag-cyan">HUB-48 · Persistencia</span>
+            <h3 style="margin-top:12px;">Colisión <code>users_email_key</code> y <code>CRLF</code></h3>
+            <p style="color:var(--text-secondary); font-size:0.94rem; margin-top:8px;">
+              El Checker reprodujo fallos al intercambiar correos en el seed SQL repetible y saltos de línea Windows <code>CRLF</code> en fixtures <code>.mdx</code> que rompían la regla <code>ARC-02</code>.
+            </p>
+          </div>
+          <div class="panel">
+            <span class="tag tag-emerald">Resiliencia Operativa</span>
+            <h3 style="margin-top:12px;">Blindaje del entorno Windows + Sandbox</h3>
+            <p style="color:var(--text-secondary); font-size:0.94rem; margin-top:8px;">
+              Tras detectar bloqueos <code>EPERM</code> en cache Angular y borrado de junctions con <code>mvnw clean</code>, se endurecieron <code>CLAUDE.md</code> y <code>pr-audit</code> con timeouts y consulta directa a CI.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 12: ESTADO DEL PRODUCTO (FSM INTERACTIVA) -->
+    <section class="slide" data-section="Producto" data-title="Máquina de Estados de Propuesta de Cambio" data-notes="Tiempo sugerido: 1.5 min. Haz clic en los estados para mostrar las reglas de negocio del dominio: transición de revisión, bloqueo de merge si hay comentarios activos o si main avanzó (fast-forward only).">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <h2>Ciclo de vida de una Propuesta de Cambio</h2>
+          <p class="lead">Reglas de negocio implementadas y verificadas para el flujo editorial en TesisHub (haz clic en cada estado).</p>
+        </div>
+        <div class="fsm-row" id="fsm-row">
+          <button class="fsm-state is-active" data-state="ABIERTA" type="button">ABIERTA</button>
+          <span class="fsm-arrow">→</span>
+          <button class="fsm-state" data-state="EN_REVISION" type="button">EN_REVISION</button>
+          <span class="fsm-arrow">↔</span>
+          <button class="fsm-state" data-state="CAMBIOS_SOLICITADOS" type="button">CAMBIOS_SOLICITADOS</button>
+          <span class="fsm-arrow">→</span>
+          <button class="fsm-state" data-state="APROBADA" type="button">APROBADA</button>
+          <span class="fsm-arrow">→</span>
+          <button class="fsm-state" data-state="CONSOLIDADA" type="button">CONSOLIDADA</button>
+          <button class="fsm-state" data-state="CANCELADA" type="button" style="margin-left:auto; border-color:rgba(251,113,133,0.4); color:var(--accent-rose);">CANCELADA</button>
+        </div>
+        <div class="panel panel-accent-cyan" id="fsm-detail">
+          <h3 id="fsm-title" class="text-cyan">Estado: ABIERTA</h3>
+          <p id="fsm-desc" style="color:var(--text-secondary); margin-top:8px;">
+            El autor crea la Propuesta de Cambio dentro de su Espacio de Trabajo y sube la primera iteración (<code>.zip</code> o <code>.tex</code> validado contra <code>RV-01..08</code>). Se crea la rama aislada en el Módulo 2.
+          </p>
+          <div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;" id="fsm-guards">
+            <span class="tag tag-cyan">Rol: Autor Principal</span>
+            <span class="tag">Rollback automático si falla GitLab</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 13: CONCLUSIONES Y ROADMAP -->
+    <section class="slide" data-section="Cierre" data-title="Conclusiones y Próximos Pasos" data-notes="Tiempo sugerido: 1.5 min. Cierra conectando los dos aportes de tu tesis: la plataforma TesisHub funcionando con calidad industrial, y la evidencia empírica del flujo Maker-Checker. Abre espacio para preguntas.">
+      <div class="slide-inner">
+        <div class="slide-header">
+          <h2>Conclusiones y próximos pasos hacia el MVP</h2>
+          <p class="lead">Combinar especialización de agentes con verificación empírica produce software auditable a velocidad de sprint.</p>
+        </div>
+        <div class="grid-2">
+          <div class="panel panel-accent-emerald">
+            <h3>Aportes demostrados</h3>
+            <ul class="clean-list" style="margin-top:14px;">
+              <li><span><strong>Maker–Checker desacoplado:</strong> supera al agente único al eliminar el sesgo de confirmación y separar síntesis de auditoría.</span></li>
+              <li><span><strong>Pizarra en Jira:</strong> coordina agentes heterogéneos sin protocolos complejos punto a punto.</span></li>
+              <li><span><strong>Base sólida de TesisHub:</strong> arquitectura hexagonal, contratos OpenAPI, seguridad Entra ID y CU-01 completo.</span></li>
+            </ul>
+          </div>
+          <div class="panel panel-accent-cyan">
+            <h3>Roadmap inmediato</h3>
+            <ul class="clean-list" style="margin-top:14px;">
+              <li><span><strong>Sprint 4 (CU-02):</strong> flujo completo de Propuestas de Cambio, carga de iteraciones y visor diff con Monaco Editor.</span></li>
+              <li><span><strong>Comentarios anclados:</strong> integración de comentarios IA (<code>origen = IA</code>) y veredicto humano (<code>origen = HUMANO</code>).</span></li>
+              <li><span><strong>Integración Módulos 2 y 3:</strong> sustitución progresiva de adaptadores mock por instancias reales de GitLab CE y Ollama/vLLM.</span></li>
+            </ul>
+          </div>
+        </div>
+        <div style="margin-top:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <span class="mono text-cyan" style="font-size:0.95rem;">¿Preguntas o comentarios?</span>
+          <div style="display:flex; gap:10px;">
+            <span class="tag">fcbiyt-uatx/tesishub-backend</span>
+            <span class="tag">fcbiyt-uatx/tesishub-frontend</span>
+            <span class="tag">fcbiyt-uatx/tesishub-infra</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <aside class="notes-drawer" id="notes-drawer" aria-label="Notas del presentador">
+    <div class="notes-header">
+      <span>NOTAS DE EXPOSICIÓN (20 MIN)</span>
+      <button class="btn-chip" id="close-notes" type="button" style="padding:2px 8px;">Cerrar</button>
+    </div>
+    <div class="notes-body" id="notes-body"></div>
+  </aside>
+
+  <div class="overview-overlay" id="overview-overlay" aria-label="Vista general de diapositivas">
+    <div style="max-width:1220px; margin:0 auto; display:flex; justify-content:space-between; align-items:center;">
+      <h2>Mapa de la presentación (14 slides)</h2>
+      <button class="btn-icon" id="close-overview" type="button">Cerrar (G)</button>
+    </div>
+    <div class="overview-grid" id="overview-grid"></div>
+  </div>
+
+  <footer class="hud-bottom">
+    <div class="nav-hint">
+      <span><span class="kbd">←</span> <span class="kbd">→</span> Navegar</span>
+      <span><span class="kbd">G</span> Mapa</span>
+      <span><span class="kbd">N</span> Notas</span>
+      <span><span class="kbd">F</span> Pantalla completa</span>
+    </div>
+    <div class="nav-controls">
+      <button class="btn-icon" id="btn-prev" type="button" aria-label="Diapositiva anterior">←</button>
+      <button class="btn-icon" id="btn-overview" type="button">Mapa</button>
+      <button class="btn-icon" id="btn-notes" type="button">Notas</button>
+      <button class="btn-icon" id="btn-fs" type="button" aria-label="Pantalla completa">⛶</button>
+      <button class="btn-icon" id="btn-next" type="button" aria-label="Siguiente diapositiva">→</button>
+    </div>
+  </footer>
+
+  <!-- Three.js CDN for 3D WebGL topology background (graceful fallback built in) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    (function () {
+      const slides = Array.from(document.querySelectorAll('.slide'));
+      const total = slides.length;
+      let current = 0;
+
+      const progressFill = document.getElementById('progress-fill');
+      const progressTrack = document.querySelector('.progress-track');
+      const slideCounter = document.getElementById('slide-counter');
+      const sectionLabel = document.getElementById('section-label');
+      const notesDrawer = document.getElementById('notes-drawer');
+      const notesBody = document.getElementById('notes-body');
+      const overviewOverlay = document.getElementById('overview-overlay');
+      const overviewGrid = document.getElementById('overview-grid');
+
+      function pad(n) {
+        return String(n).padStart(2, '0');
+      }
+
+      function renderOverview() {
+        overviewGrid.innerHTML = '';
+        slides.forEach((s, idx) => {
+          const card = document.createElement('button');
+          card.type = 'button';
+          card.className = 'overview-card' + (idx === current ? ' is-current' : '');
+          card.innerHTML = `
+            <div class="ov-num">${pad(idx + 1)} · ${s.dataset.section || ''}</div>
+            <div class="ov-title">${s.dataset.title || 'Slide ' + (idx + 1)}</div>
+          `;
+          card.addEventListener('click', () => {
+            goTo(idx);
+            toggleOverview(false);
+          });
+          overviewGrid.appendChild(card);
+        });
+      }
+
+      function goTo(index) {
+        const next = Math.max(0, Math.min(total - 1, index));
+        current = next;
+
+        slides.forEach((s, idx) => {
+          s.classList.remove('is-active', 'is-prev');
+          if (idx === current) {
+            s.classList.add('is-active');
+            s.scrollTop = 0;
+          } else if (idx < current) {
+            s.classList.add('is-prev');
+          }
+        });
+
+        const pct = ((current + 1) / total) * 100;
+        progressFill.style.width = pct + '%';
+        progressTrack.setAttribute('aria-valuenow', String(current + 1));
+        slideCounter.textContent = `${pad(current + 1)} / ${pad(total)}`;
+        sectionLabel.textContent = slides[current].dataset.section || '';
+        notesBody.textContent = slides[current].dataset.notes || '';
+
+        if (window.__update3DCamera) {
+          window.__update3DCamera(current, total);
+        }
+        if (overviewOverlay.classList.contains('is-open')) {
+          renderOverview();
+        }
+      }
+
+      function toggleNotes(force) {
+        const open = typeof force === 'boolean' ? force : !notesDrawer.classList.contains('is-open');
+        notesDrawer.classList.toggle('is-open', open);
+      }
+
+      function toggleOverview(force) {
+        const open = typeof force === 'boolean' ? force : !overviewOverlay.classList.contains('is-open');
+        if (open) renderOverview();
+        overviewOverlay.classList.toggle('is-open', open);
+      }
+
+      function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen?.();
+        } else {
+          document.exitFullscreen?.();
+        }
+      }
+
+      document.getElementById('btn-prev').addEventListener('click', () => goTo(current - 1));
+      document.getElementById('btn-next').addEventListener('click', () => goTo(current + 1));
+      document.getElementById('btn-notes').addEventListener('click', () => toggleNotes());
+      document.getElementById('close-notes').addEventListener('click', () => toggleNotes(false));
+      document.getElementById('btn-overview').addEventListener('click', () => toggleOverview());
+      document.getElementById('close-overview').addEventListener('click', () => toggleOverview(false));
+      document.getElementById('btn-fs').addEventListener('click', toggleFullscreen);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') {
+          if (!overviewOverlay.classList.contains('is-open')) goTo(current + 1);
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
+          if (!overviewOverlay.classList.contains('is-open')) goTo(current - 1);
+        } else if (e.key.toLowerCase() === 'g') {
+          toggleOverview();
+        } else if (e.key.toLowerCase() === 'n') {
+          toggleNotes();
+        } else if (e.key.toLowerCase() === 'f') {
+          toggleFullscreen();
+        } else if (e.key === 'Escape') {
+          toggleOverview(false);
+          toggleNotes(false);
+        }
+      });
+
+      /* Slide 3: Interactive 3D Modular Stack */
+      const layerData = {
+        1: {
+          title: 'Módulo 1: Plataforma y Orquestación',
+          colorClass: 'text-cyan',
+          desc: 'Expone la API REST <code>/api/v1</code> y la SPA en Angular. Define puertos de salida (<code>VersioningPort</code>, <code>AiReviewPort</code>) con adaptadores HTTP reales y adaptadores <em>mock</em> deterministas para pruebas aisladas y defensa independiente.',
+          tags: ['Hexagonal', 'Mock + HTTP Adapters', 'Rollback transaccional']
+        },
+        2: {
+          title: 'Módulo 2: Motor de Versionado (GitLab CE)',
+          colorClass: 'text-indigo',
+          desc: 'Gestiona repositorios institucionales, creación de ramas por Propuesta de Cambio, cálculo de diffs línea por línea y fusión <em>fast-forward only</em> hacia <code>main</code>.',
+          tags: ['GitLab CE Self-Hosted', 'Fast-Forward Only', 'Diffs .tex']
+        },
+        3: {
+          title: 'Módulo 3: Agente de Revisión IA On-Premise',
+          colorClass: 'text-emerald',
+          desc: 'Ejecuta modelos locales (Ollama / vLLM, Llama 3 / Mistral) dentro de la red UATx. Produce comentarios anclados por línea y categoría (ortografía, estilo, semántica, citas) sin retener estado entre proyectos.',
+          tags: ['Ollama / vLLM', 'Stateless', 'Soberanía RNF #1']
+        }
+      };
+
+      const stackLayersEl = document.getElementById('stack-layers');
+      const btnExplode = document.getElementById('btn-explode');
+      const layerButtons = document.querySelectorAll('[data-select-layer]');
+      const layerCards = document.querySelectorAll('.stack-layer');
+
+      function selectLayer(id) {
+        layerCards.forEach((el) => el.classList.toggle('is-selected', el.dataset.layer === String(id)));
+        const info = layerData[id];
+        const titleEl = document.getElementById('inspector-title');
+        titleEl.textContent = info.title;
+        titleEl.className = info.colorClass;
+        document.getElementById('inspector-desc').innerHTML = info.desc;
+        document.getElementById('inspector-tags').innerHTML = info.tags
+          .map((t, i) => `<span class="tag ${i === 0 ? 'tag-cyan' : ''}">${t}</span>`)
+          .join('');
+      }
+
+      btnExplode.addEventListener('click', () => {
+        const exploded = stackLayersEl.classList.toggle('exploded');
+        btnExplode.classList.toggle('is-active', exploded);
+        btnExplode.textContent = exploded ? 'Agrupar capas 3D' : 'Separar capas 3D';
+      });
+      stackLayersEl.classList.add('exploded');
+
+      layerCards.forEach((card) => card.addEventListener('click', () => selectLayer(card.dataset.layer)));
+      layerButtons.forEach((btn) => btn.addEventListener('click', () => selectLayer(btn.dataset.selectLayer)));
+
+      /* Slide 4: Interactive Archify Component Diagram */
+      const archMeta = {
+        entraid: {
+          title: 'Microsoft Entra ID (OAuth2 / OIDC)',
+          desc: 'Proveedor de identidad institucional. Emite tokens JWT validados por JWKS; en pruebas locales se sustituye por Fake Entra ID (HUB-83).',
+          tag: 'Seguridad / SSO'
+        },
+        frontend: {
+          title: 'Frontend SPA (Angular 20 + Signals)',
+          desc: 'Interfaz en español con Standalone Components, cliente tipado OpenAPI, MSAL Angular y visor Monaco/MDX.',
+          tag: 'tesishub-frontend'
+        },
+        postgres: {
+          title: 'PostgreSQL + Flyway (V1..V10)',
+          desc: 'Almacena exclusivamente objetos de negocio académicos (users, projects, change_requests, comments).',
+          tag: 'Persistencia'
+        },
+        security: {
+          title: 'adapters/security',
+          desc: 'Filtra peticiones HTTP, valida firma JWT contra JWKS y aplica control de acceso RBAC en servidor.',
+          tag: 'Backend Adapter'
+        },
+        web: {
+          title: 'adapters/web (REST /api/v1)',
+          desc: 'Controladores Spring MVC que implementan el contrato OpenAPI y devuelven errores RFC 9457 (ProblemDetail).',
+          tag: 'Primary Adapter'
+        },
+        persistence: {
+          title: 'adapters/persistence',
+          desc: 'Entidades @Entity separadas del dominio con mapeo explícito; implementa los puertos *RepositoryPort.',
+          tag: 'Secondary Adapter'
+        },
+        application: {
+          title: 'application (Casos de uso + Validador ZIP)',
+          desc: 'Orquesta transacciones, reglas RV-01..08 para archivos ZIP y coordina los puertos de salida.',
+          tag: 'Application Layer'
+        },
+        domain: {
+          title: 'domain (Núcleo sin framework)',
+          desc: 'Entidades y máquina de estados puros. ArchUnit prohíbe cualquier import de Spring o JPA.',
+          tag: 'ArchUnit Pure'
+        },
+        versioning: {
+          title: 'VersioningPort Adapter (Mock / HTTP)',
+          desc: 'Abstrae GitLab CE. Perfil @Profile("mock-versioning") activo en desarrollo; cliente HTTP para integración.',
+          tag: 'Output Port'
+        },
+        ai: {
+          title: 'AiReviewPort Adapter (Mock / HTTP)',
+          desc: 'Abstrae al agente IA. Mapea observaciones JSON a comentarios anclados por ruta, línea y cita.',
+          tag: 'Output Port'
+        },
+        m2: {
+          title: 'Módulo 2 · Versionado (GitLab CE + MDX)',
+          desc: 'Convierte .tex/.docx a formato canónico MDX y gestiona ramas, diffs y merges fast-forward.',
+          tag: 'Tesis Externa'
+        },
+        m3: {
+          title: 'Módulo 3 · Agente de Revisión IA',
+          desc: 'Inferencia local (Ollama / vLLM) dentro de la red universitaria. Cero fuga de documentos.',
+          tag: 'Tesis Externa'
+        }
+      };
+
+      const archNodes = document.querySelectorAll('.arch-node');
+      const archEdges = document.querySelectorAll('.arch-edge');
+      const archFilterBtns = document.querySelectorAll('[data-arch-filter]');
+
+      function highlightArchNode(nodeId) {
+        archNodes.forEach((n) => {
+          const isTarget = n.dataset.node === nodeId;
+          const isNeighbor = Array.from(archEdges).some(
+            (e) =>
+              (e.dataset.from === nodeId && e.dataset.to === n.dataset.node) ||
+              (e.dataset.to === nodeId && e.dataset.from === n.dataset.node)
+          );
+          n.classList.toggle('is-selected', isTarget);
+          n.classList.toggle('arch-dimmed', !isTarget && !isNeighbor);
+        });
+        archEdges.forEach((e) => {
+          const connected = e.dataset.from === nodeId || e.dataset.to === nodeId;
+          e.classList.toggle('arch-dimmed', !connected);
+        });
+
+        const info = archMeta[nodeId];
+        if (info) {
+          document.getElementById('arch-ins-title').textContent = info.title;
+          document.getElementById('arch-ins-desc').textContent = info.desc;
+          document.getElementById('arch-ins-tag').textContent = info.tag;
+        }
+      }
+
+      archNodes.forEach((node) => {
+        node.addEventListener('click', () => highlightArchNode(node.dataset.node));
+      });
+
+      archFilterBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          archFilterBtns.forEach((b) => b.classList.toggle('is-active', b === btn));
+          const mode = btn.dataset.archFilter;
+          archNodes.forEach((n) => n.classList.remove('is-selected', 'arch-dimmed'));
+          archEdges.forEach((e) => e.classList.remove('arch-dimmed'));
+
+          if (mode === 'hex') {
+            const keep = new Set(['web', 'security', 'application', 'domain', 'persistence']);
+            archNodes.forEach((n) => n.classList.toggle('arch-dimmed', !keep.has(n.dataset.node)));
+            archEdges.forEach((e) => e.classList.toggle('arch-dimmed', !(keep.has(e.dataset.from) && keep.has(e.dataset.to))));
+          } else if (mode === 'ports') {
+            const keep = new Set(['application', 'versioning', 'ai', 'm2', 'm3']);
+            archNodes.forEach((n) => n.classList.toggle('arch-dimmed', !keep.has(n.dataset.node)));
+            archEdges.forEach((e) => e.classList.toggle('arch-dimmed', !(keep.has(e.dataset.from) && keep.has(e.dataset.to))));
+          }
+        });
+      });
+
+      /* Slide 7: Interactive Blackboard Phase Filter */
+      const bbPhaseBtns = document.querySelectorAll('[data-bb-phase]');
+      const bbItems = document.querySelectorAll('.bb-item');
+
+      bbPhaseBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          bbPhaseBtns.forEach((b) => b.classList.toggle('is-active', b === btn));
+          const phase = btn.dataset.bbPhase;
+          bbItems.forEach((item) => {
+            const phases = (item.dataset.phase || '').split(' ');
+            item.classList.toggle('arch-dimmed', phase !== 'all' && !phases.includes(phase));
+          });
+        });
+      });
+
+      /* Slide 12: Interactive FSM */
+      const fsmData = {
+        ABIERTA: {
+          title: 'Estado: ABIERTA',
+          desc: 'El autor crea la Propuesta de Cambio dentro de su Espacio de Trabajo y sube la primera iteración (<code>.zip</code> o <code>.tex</code> validado contra <code>RV-01..08</code>). Se crea la rama aislada en el Módulo 2.',
+          guards: ['Rol: Autor Principal', 'Rollback automático si falla GitLab']
+        },
+        EN_REVISION: {
+          title: 'Estado: EN_REVISION',
+          desc: 'Se solicita la pre-revisión del Agente IA on-premise (comentarios <code>origen = IA</code> por ortografía, estilo, semántica o citas) y la revisión del Asesor humano.',
+          guards: ['Agente IA stateless', 'Notificación SSE + SMTP al asesor']
+        },
+        CAMBIOS_SOLICITADOS: {
+          title: 'Estado: CAMBIOS_SOLICITADOS',
+          desc: 'El asesor detecta observaciones bloqueantes. El autor sube una nueva iteración, atiende los comentarios y los marca como <code>RESUELTO</code> antes de volver a <code>EN_REVISION</code>.',
+          guards: ['Comentarios: ACTIVO / RESUELTO / OBSOLETO', 'Bucle iterativo']
+        },
+        APROBADA: {
+          title: 'Estado: APROBADA',
+          desc: 'El asesor emite un dictamen formal de aprobación. El botón <strong>Fusionar</strong> permanece bloqueado si aún existe algún comentario <code>ACTIVO</code> o si <code>main</code> avanzó (indicador <em>desactualizada</em>).',
+          guards: ['0 comentarios ACTIVO', 'Fast-forward check (RF-08)']
+        },
+        CONSOLIDADA: {
+          title: 'Estado: CONSOLIDADA (Terminal)',
+          desc: 'Se ejecuta la fusión <em>fast-forward only</em> hacia la rama principal del documento y se dispara la compilación automática del PDF institucional final.',
+          guards: ['Fast-forward only', 'Compilación LaTeX → PDF']
+        },
+        CANCELADA: {
+          title: 'Estado: CANCELADA (Terminal)',
+          desc: 'Transición disponible desde cualquier estado no terminal cuando el autor o asesor decide descartar la propuesta sin afectar la rama principal.',
+          guards: ['Cierre limpio', 'Historial preservado']
+        }
+      };
+
+      const fsmStates = document.querySelectorAll('.fsm-state');
+      fsmStates.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const key = btn.dataset.state;
+          fsmStates.forEach((b) => b.classList.toggle('is-active', b === btn));
+          const s = fsmData[key];
+          document.getElementById('fsm-title').textContent = s.title;
+          document.getElementById('fsm-desc').innerHTML = s.desc;
+          document.getElementById('fsm-guards').innerHTML = s.guards
+            .map((g, i) => `<span class="tag ${i === 0 ? 'tag-cyan' : ''}">${g}</span>`)
+            .join('');
+        });
+      });
+
+      /* 3D WebGL Background (Three.js with Canvas 2D fallback) */
+      (function init3D() {
+        const canvas = document.getElementById('bg-3d');
+        if (!window.THREE) {
+          return;
+        }
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 36;
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        // Particle Constellation
+        const count = 90;
+        const positions = new Float32Array(count * 3);
+        const nodes = [];
+        for (let i = 0; i < count; i++) {
+          const x = (Math.random() - 0.5) * 64;
+          const y = (Math.random() - 0.5) * 40;
+          const z = (Math.random() - 0.5) * 32;
+          positions[i * 3] = x;
+          positions[i * 3 + 1] = y;
+          positions[i * 3 + 2] = z;
+          nodes.push(new THREE.Vector3(x, y, z));
+        }
+
+        const pGeo = new THREE.BufferGeometry();
+        pGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const pMat = new THREE.PointsMaterial({ color: 0x22d3ee, size: 0.28, transparent: true, opacity: 0.65 });
+        group.add(new THREE.Points(pGeo, pMat));
+
+        // Subtle connecting edges
+        const linePositions = [];
+        for (let i = 0; i < count; i++) {
+          for (let j = i + 1; j < count; j++) {
+            if (nodes[i].distanceTo(nodes[j]) < 9.5) {
+              linePositions.push(nodes[i].x, nodes[i].y, nodes[i].z, nodes[j].x, nodes[j].y, nodes[j].z);
+            }
+          }
+        }
+        const lGeo = new THREE.BufferGeometry();
+        lGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+        const lMat = new THREE.LineBasicMaterial({ color: 0x818cf8, transparent: true, opacity: 0.14 });
+        group.add(new THREE.LineSegments(lGeo, lMat));
+
+        let targetRotY = 0;
+        let targetRotX = 0;
+        let mouseX = 0;
+        let mouseY = 0;
+
+        window.__update3DCamera = function (idx, totalSlides) {
+          targetRotY = (idx / totalSlides) * Math.PI * 0.85;
+          targetRotX = Math.sin(idx * 0.7) * 0.22;
+        };
+
+        window.addEventListener('mousemove', (e) => {
+          mouseX = (e.clientX / window.innerWidth - 0.5) * 0.18;
+          mouseY = (e.clientY / window.innerHeight - 0.5) * 0.14;
+        });
+
+        window.addEventListener('resize', () => {
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        function animate() {
+          requestAnimationFrame(animate);
+          group.rotation.y += ((targetRotY + mouseX) - group.rotation.y) * 0.04;
+          group.rotation.x += ((targetRotX + mouseY) - group.rotation.x) * 0.04;
+          group.rotation.z += 0.0005;
+          renderer.render(scene, camera);
+        }
+        animate();
+      })();
+
+      goTo(0);
+    })();
+  </script>
+</body>
+</html>
